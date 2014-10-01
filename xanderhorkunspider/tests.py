@@ -4,6 +4,8 @@ __email__ = 'mindkilleralexs@gmail.com'
 import unittest
 import httpretty
 from xanderhorkunspider import loader
+from xanderhorkunspider import models
+from xanderhorkunspider import parser
 
 
 class TestLoader(unittest.TestCase):
@@ -25,3 +27,27 @@ class TestLoader(unittest.TestCase):
             self.assertTrue(response.headers[key] == value, "Response header's '%s' value is invalid" % key)
         self.assertTrue(response.url == self.mock_url)
         self.assertTrue(response.body == self.mock_content)
+
+
+class TestLinksParser(unittest.TestCase):
+    mock_host="http://example.com"
+    mock_text="<html><head><title>Some title</title></head><body><h1>Hello you!</h1>" \
+              "<a someattr=\"someshit\" href=\"/relative-link/23\" otherattr>AAA</a><p>someshit</p>" \
+              "<a href=\"http://ohersubdomain.example.com/someshit\">DDD</a>" \
+              "<p>Some text <a dd=\"jdsh\" href=\"http://example.com/gofuckyourself\"></a>" \
+              "<a href=\"http://fuckthislink.com/someshit2</a>" \
+              "<a hh=\"dsad\" href=\"gofurther\">SSSS</a></p></body></html>"
+    mock_page_url="http://somesubdomain.example.com"
+    mock_url="/someshit"
+
+    def test_parse(self):
+        website=models.Website("http://www"+self.mock_host, "Some site", self.mock_host)
+        page=models.Page(website, self.mock_page_url+self.mock_url, self.mock_text)
+        p=parser.OwnLinksParser()
+        links=p.parse(page)
+        testlinks={self.mock_page_url+'/relative-link/23', 'http://ohersubdomain.example.com/someshit',
+                                  self.mock_host+'/gofuckyourself',
+                                  self.mock_page_url+self.mock_url+'/gofurther'}
+        print(links)
+        print(testlinks)
+        self.assertTrue(links == testlinks)
