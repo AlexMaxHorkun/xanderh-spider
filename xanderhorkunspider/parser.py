@@ -21,18 +21,19 @@ class LinksParser:
         urldata = urllib.parse.urlparse(url)
         return urldata.scheme in ('http', 'https')
 
-    def parse(self, page):
-        match=re.findall(r'<a\s.*?href="(.*?)".*?>', page.content)
-        urls=set()
+    def parse(self, loading):
+        match = re.findall(r'<a\s.*?href="(.*?)".*?>', loading.content)
+        urls = set()
+        page_url_data=urllib.parse.urlparse(loading.page.url)
         for url in match:
             if url.startswith("/"):
-                url=urllib.parse.urlparse(page.url).netloc+url
+                url = page_url_data.scheme+"://"+page_url_data.netloc + url
 
             elif not (url.startswith('http://') or url.startswith('https://')):
-                if not page.url.endswith('/'):
-                    url='/'+url
-                url=page.url+url
-            if self._validateurl(page, url):
+                if not loading.page.url.endswith('/'):
+                    url = '/' + url
+                url = loading.page.url + url
+            if self._validateurl(loading, url):
                 urls.add(url)
         return urls
 
@@ -41,8 +42,9 @@ class OwnLinksParser(LinksParser):
     """
     Allows only links referencing same host
     """
-    def _validateurl(self, page, url):
-        valid=super()._validateurl(page, url)
+
+    def _validateurl(self, loading, url):
+        valid = super()._validateurl(loading, url)
         if valid:
-            return urllib.parse.urlparse(url).netloc.endswith(page.website.host)
+            return urllib.parse.urlparse(url).netloc.endswith(loading.page.website.host)
         return valid

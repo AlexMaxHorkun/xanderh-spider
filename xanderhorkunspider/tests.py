@@ -30,23 +30,24 @@ class TestLoader(unittest.TestCase):
 
 
 class TestLinksParser(unittest.TestCase):
-    mock_host="http://example.com"
+    mock_host="example.com"
     mock_text="<html><head><title>Some title</title></head><body><h1>Hello you!</h1>" \
               "<a someattr=\"someshit\" href=\"/relative-link/23\" otherattr>AAA</a><p>someshit</p>" \
               "<a href=\"http://ohersubdomain.example.com/someshit\">DDD</a>" \
               "<p>Some text <a dd=\"jdsh\" href=\"http://example.com/gofuckyourself\"></a>" \
-              "<a href=\"http://fuckthislink.com/someshit2</a>" \
+              "<a href=\"http://fuckthislink.com/someshit2\">SDaa</a>" \
               "<a hh=\"dsad\" href=\"gofurther\">SSSS</a></p></body></html>"
     mock_page_url="http://somesubdomain.example.com"
     mock_url="/someshit"
 
     def test_parse(self):
         website=models.Website("http://www"+self.mock_host, "Some site", self.mock_host)
-        page=models.Page(website, self.mock_page_url+self.mock_url, self.mock_text)
+        page=models.Page(website, self.mock_page_url+self.mock_url)
+        loading=models.Loading(page, True, self.mock_text)
         p=parser.OwnLinksParser()
-        links=p.parse(page)
+        links=p.parse(loading)
         testlinks={self.mock_page_url+'/relative-link/23', 'http://ohersubdomain.example.com/someshit',
-                                  self.mock_host+'/gofuckyourself',
+                                  "http://"+self.mock_host+'/gofuckyourself',
                                   self.mock_page_url+self.mock_url+'/gofurther'}
         print(links)
         print(testlinks)

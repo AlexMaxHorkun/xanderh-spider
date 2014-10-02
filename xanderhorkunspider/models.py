@@ -8,6 +8,7 @@ class Website:
     """
     Holds data about added websites to parse.
     """
+    id = 0
     homepage = ""
     name = ""
     pages = set()
@@ -28,12 +29,12 @@ class Page:
     """
     Holds info about loaded pages.
     """
+    id = 0
     url = ""
-    content = None
-    _loaded = None
     website = None
+    loadings = []
 
-    def __init__(self, website, url, content=None, loaded=None):
+    def __init__(self, website, url):
         """
         Initiates obj with it's url and other attrs.
 
@@ -43,24 +44,55 @@ class Page:
         :param loaded: last time loaded.
         """
         self.url = url
-        self.content = content
-        self.loaded = loaded
         self.website = website
         website.pages.add(self)
 
-    @property
-    def loaded(self):
-        return self._loaded
-
-    @loaded.setter
-    def loaded(self, value):
+    def isloaded(self):
         """
-        Checks if given value is datetime or None.
+        Checks if the page's content was successfully loaded at least once.
 
-        :param value: new 'loaded' value
-        :return:
+        :return: bool
         """
-        if isinstance(value, datetime.datetime) or value is None:
-            self._loaded = value
+        for loading in self.loadings:
+            if loading.success:
+                return True
+        return False
+
+    def getcontent(self):
+        """
+        Returns content of last successful loading.
+        :return: Content (HTML) or None
+        """
+        last_loading = None
+        for l in self.loadings:
+            if l.success and (last_loading is None or last_loading.time < l.time):
+                last_loading = l
+        if last_loading:
+            return last_loading.content
         else:
-            raise ValueError("Loaded attribute can be only a datetime instance or None")
+            return None
+
+
+class Loading:
+    """
+    Holds info about a loading attempt.
+    """
+    id = 0
+    page = None
+    success = False
+    content = ""
+    time = None
+
+    def __init__(self, page, success, content="", time=datetime.datetime.now()):
+        """
+        :param page: link to Page object.
+        :param success: Whether page loading was successful.
+        :param content: Page's content (HTML).
+        :param time: Date and time when loading was finished.
+        """
+        self.content = content
+        self.page = page
+        if self not in page.loadings:
+            page.loadings.append(self)
+        self.success = success
+        self.time = time
