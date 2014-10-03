@@ -4,7 +4,7 @@ __email__ = 'mindkilleralexs@gmail.com'
 import datetime
 
 
-class Website:
+class Website(object):
     """
     Holds data about added websites to parse.
     """
@@ -25,7 +25,7 @@ class Website:
         self.host = host
 
 
-class Page:
+class Page(object):
     """
     Holds info about loaded pages.
     """
@@ -40,8 +40,6 @@ class Page:
 
         :param url: Address.
         :param website: Website that this page belongs.
-        :param content: Response body.
-        :param loaded: last time loaded.
         """
         self.url = url
         self.website = website
@@ -73,7 +71,7 @@ class Page:
             return None
 
 
-class Loading:
+class Loading(object):
     """
     Holds info about a loading attempt.
     """

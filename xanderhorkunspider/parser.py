@@ -5,7 +5,7 @@ import urllib.parse
 import re
 
 
-class LinksParser:
+class LinksParser(object):
     """
     Gets links out of html.
     """
@@ -24,10 +24,10 @@ class LinksParser:
     def parse(self, loading):
         match = re.findall(r'<a\s.*?href="(.*?)".*?>', loading.content)
         urls = set()
-        page_url_data=urllib.parse.urlparse(loading.page.url)
+        page_url_data = urllib.parse.urlparse(loading.page.url)
         for url in match:
             if url.startswith("/"):
-                url = page_url_data.scheme+"://"+page_url_data.netloc + url
+                url = page_url_data.scheme + "://" + page_url_data.netloc + url
 
             elif not (url.startswith('http://') or url.startswith('https://')):
                 if not loading.page.url.endswith('/'):

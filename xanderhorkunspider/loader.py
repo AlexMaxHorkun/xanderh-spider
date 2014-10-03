@@ -4,7 +4,7 @@ __email__ = 'mindkilleralexs@gmail.com'
 import requests
 
 
-class LoadResult:
+class LoadResult(object):
     url = ""
     headers = {}
     body = ""
@@ -22,14 +22,15 @@ class LoadResult:
         self.body = body
 
 
-class Loader:
+class Loader(object):
     timeout = 5
 
     def __init__(self, timeout=0):
         """
         :param timeout: max amount of time to load pages
         """
-        self.timeout = int(timeout)
+        if timeout:
+            self.timeout = int(timeout)
 
     def load(self, url, timeout=None):
         """
@@ -37,12 +38,12 @@ class Loader:
 
         :param url: URL address.
         :param timeout: max amount of time to load page within, optional.
-        :return: page headers and body in LoadResult obj.
+        :return: page headers and body in LoadResult obj or None if loading failed.
         """
         if timeout is None and self.timeout is not None:
             timeout = self.timeout
 
         http_response = requests.get(url, timeout=timeout)
         if not http_response:
-            raise RuntimeError("Failed to load page")
+            return None
         return LoadResult(url, http_response.headers, http_response.text)
