@@ -2,13 +2,14 @@ __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
 import unittest
-
 import httpretty
-
+import time
+import sys
 from xanderhorkunspider import loader
 from xanderhorkunspider import models
 from xanderhorkunspider import parser
 from xanderhorkunspider import spider
+from xanderhorkunspider import domain
 
 
 class TestLoader(unittest.TestCase):
@@ -76,3 +77,48 @@ class TestSpider(unittest.TestCase):
         self.assertTrue(loading.content == self.mock_content)
         self.assertTrue(page is loading.page)
         self.assertTrue(links == {self.mock_url + "/someotherpage", })
+
+
+class MockWebsites(domain.Websites):
+    loadings=[]
+
+    def __init__(self):
+        super().__init__(None, None, None)
+
+    def saveLoading(self, loading):
+        self.loadings.append(loading)
+
+    def findPageByUrl(self, url):
+        return None
+
+    def createPageFromUrl(self, url):
+        websites=models.Website("", "", "")
+        page=models.Page(websites, url)
+        return page
+
+
+class TestSpiderManager(unittest.TestCase):
+    mock_host="example.com"
+    mock_base_url="http://somesub."+mock_host+"/somepage"
+
+    @httpretty.activate
+    def test_threepages(self):
+        website=models.Website("http://www."+self.mock_host, "some site", self.mock_host)
+        page1=models.Page(website,self.mock_base_url)
+        page2=models.Page(website, self.mock_base_url+'/page2')
+        httpretty.register_uri(httpretty.GET, page1.url,
+                               body="<p>somestuff</p>")
+        httpretty.register_uri(httpretty.GET, page2.url,
+                               body="<p>sup</p><a href=\"page3\">link to 3</a>")
+        httpretty.register_uri(httpretty.GET, page2.url+"/page3",
+                               body="<div>enough</div>")
+        websites=MockWebsites()
+        spdr=spider.Spider(loader.Loader(), parser.OwnLinksParser())
+        spider_manager=spider.SpiderManager(websites, spdr, 2)
+        spider_manager.crawl(page2)
+        spider_manager.crawl(page1)
+        spider_manager.start()
+        received_links=set()
+        for l in websites.loadings:
+            received_links.add(l.page.url)
+        self.assertTrue(received_links == {self.mock_base_url, self.mock_base_url+'/page2', page2.url+"/page3"})

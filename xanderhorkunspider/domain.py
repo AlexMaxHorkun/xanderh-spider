@@ -30,3 +30,17 @@ class Websites(object):
 
     def find(self, id):
         return self._website_dao.find(id)
+
+    def saveLoading(self, loading):
+        if not loading.page:
+            raise ValueError("Loading must have link to page")
+        if loading.id==0:
+            self._loading_dao.persist(loading)
+        else:
+            self._loading_dao.save(loading)
+
+    def findPageByUrl(self, url):
+        return self._page_dao.findByUrl(url)
+
+    def createPageFromUrl(self, url):
+        raise NotImplementedError()

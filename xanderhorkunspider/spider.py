@@ -2,8 +2,8 @@ __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
 from multiprocessing import process
+import threading
 import time
-
 from xanderhorkunspider import loader
 from xanderhorkunspider import parser
 from xanderhorkunspider import models
@@ -52,7 +52,7 @@ class Spider(object):
         return loading, links
 
 
-class CrawlingProcess(process.BaseProcess):
+class CrawlingProcess(threading.Thread):
     page = None
     resulting_loading = None
     resulting_links = None
@@ -75,14 +75,16 @@ class CrawlingProcess(process.BaseProcess):
         """
         Runs spider's crawl and saves results.
         """
+        print("crawling on %s" % self.page.url)
         loading, links = self.spider.crawl_on_page(self.page)
         self.resulting_links = links
         self.resulting_loading = loading
         self.websites.saveLoading(loading)
         self.finished = True
+        print("finished crawling on %s" % self.page.url)
 
 
-class SpiderManager(process.BaseProcess):
+class SpiderManager(threading.Thread):
     spider = Spider()
     max_process_count = 50
     __processes = []
@@ -100,7 +102,6 @@ class SpiderManager(process.BaseProcess):
         if isinstance(max_p, int) and max_p > 0:
             self.max_process_count = max_p
         self.websites = websites
-        self.start()
 
     def running_count(self):
         """
@@ -120,13 +121,14 @@ class SpiderManager(process.BaseProcess):
         """
         if not isinstance(page, models.Page):
             url = page
-            page = self.websites.findByUrl(url)
+            page = self.websites.findPageByUrl(url)
             if page is None:
                 page = self.websites.createPageFromUrl(url)
         self.__processes.append(CrawlingProcess(page, self.spider, self.websites))
 
     def run(self):
         for p in self.__processes:
+            print("Checkign processes, having %s" % (len(self.__processes)))
             if not p.is_alive():
                 if not p.finished:
                     if self.running_count() < self.max_process_count:
