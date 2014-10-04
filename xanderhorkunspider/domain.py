@@ -3,9 +3,9 @@ __email__ = 'mindkilleralexs@gmail.com'
 
 
 class Websites(object):
-    page_dao = None
-    website_dao = None
-    loading_dao = None
+    _page_dao = None
+    _website_dao = None
+    _loading_dao = None
 
     def __init__(self, page_dao, website_dao, loading_dao):
         """
@@ -13,20 +13,20 @@ class Websites(object):
         :param website_dao: WebsiteDao impl.
         :param loading_dao: LoadingDao impl.
         """
-        self.page_dao = page_dao
-        self.website_dao = website_dao
-        self.loading_dao = loading_dao
+        self._page_dao = page_dao
+        self._website_dao = website_dao
+        self._loading_dao = loading_dao
 
     def persist(self, website):
         """
         Saves Website entity, it's pages and it's pages' loadings.
         :param website: Website obj.
         """
-        self.website_dao.persist(website)
+        self._website_dao.persist(website)
         for page in website.pages:
-            self.page_dao.persist(page)
+            self._page_dao.persist(page)
             for loading in page.loadings:
-                self.loading_dao.persist(loading)
+                self._loading_dao.persist(loading)
 
     def find(self, id):
-        return self.website_dao.find(id)
+        return self._website_dao.find(id)
