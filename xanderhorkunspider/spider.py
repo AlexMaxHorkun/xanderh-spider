@@ -6,6 +6,16 @@ from xanderhorkunspider import parser
 from xanderhorkunspider import models
 
 
+class LoadingEvaluator(object):
+    def evaluateLoading(self, loading):
+        """
+        Determines whether page content is worth while.
+        :param loading: Loading object.
+        :return: Bool.
+        """
+        return 'content-type' in loading.headers and loading.headers['content-type'] == 'text/html'
+
+
 class Spider(object):
     """
     Gets page content, parses it for new links.
@@ -16,7 +26,7 @@ class Spider(object):
     def __init__(self, ldr=None, links_parser=None):
         """
         :param ldr: Custom Loader impl if needed.
-        :param links_parser: Custom LinksParser impl if needed
+        :param links_parser: Custom LinksParser impl if needed.
         """
         if not ldr is None:
             self.page_loader = ldr
@@ -30,12 +40,21 @@ class Spider(object):
         :return: Resulting Loading entity and links list.
         """
         load_result = self.page_loader.load(page.url)
-        content = ""
-        if not load_result is None:
-            content = load_result.body
-        loading = models.Loading(page, not load_result is None, content)
-        if len(content):
+        loading = models.Loading(page, not load_result is None, getattr(load_result, "headers", {}),
+                                 getattr(load_result, "body", ""))
+        if len(loading.content):
             links = self.links_parser.parse(loading)
         else:
             links = None
         return loading, links
+
+
+class SpiderManager(object):
+    spider = Spider()
+
+    def __init__(self, spider=None):
+        """
+        :param spider: Custom Spider impl if needed.
+        """
+        if spider is not None:
+            self.spider = spider

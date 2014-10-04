@@ -78,17 +78,20 @@ class Loading(object):
     id = 0
     page = None
     success = False
+    headers = {}
     content = ""
     time = None
 
-    def __init__(self, page, success, content="", time=datetime.datetime.now()):
+    def __init__(self, page, success, headers={}, content="", time=datetime.datetime.now()):
         """
         :param page: link to Page object.
         :param success: Whether page loading was successful.
+        :param headers: Headers dict.
         :param content: Page's content (HTML).
         :param time: Date and time when loading was finished.
         """
         self.content = content
+        self.headers = dict((k.lower(), v.lower) for k, v in headers.items())
         self.page = page
         if self not in page.loadings:
             page.loadings.append(self)
