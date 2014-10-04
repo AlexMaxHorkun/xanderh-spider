@@ -1,11 +1,12 @@
 __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
+from multiprocessing import process
+import time
+
 from xanderhorkunspider import loader
 from xanderhorkunspider import parser
 from xanderhorkunspider import models
-from xanderhorkunspider import domain
-import multiprocessing
 
 
 class LoadingEvaluator(object):
@@ -51,19 +52,41 @@ class Spider(object):
         return loading, links
 
 
-class CrawlingProcess(multiprocessing.Process):
-    page=None
-    resulting_loading=None
-    resulting_links=None
-    _process=NoneW
+class CrawlingProcess(process.BaseProcess):
+    page = None
+    resulting_loading = None
+    resulting_links = None
+    finished = False
+    spider = None
+    websites = None
+
+    def __init__(self, page, spider, websites):
+        """
+        :param page: Page to crawl on.
+        :param websites: Websites.
+        :param spider: Spider.
+        """
+        super().__init__()
+        self.page = page
+        self.spider = spider
+        self.websites = websites
+
+    def run(self):
+        """
+        Runs spider's crawl and saves results.
+        """
+        loading, links = self.spider.crawl_on_page(self.page)
+        self.resulting_links = links
+        self.resulting_loading = loading
+        self.websites.saveLoading(loading)
+        self.finished = True
 
 
-
-class SpiderManager(object):
+class SpiderManager(process.BaseProcess):
     spider = Spider()
-    max_process_count=50
-    processes={}
-    websites=None
+    max_process_count = 50
+    __processes = []
+    websites = None
 
     def __init__(self, websites, spider=None, max_p=None):
         """
@@ -71,20 +94,51 @@ class SpiderManager(object):
         :param spider: Custom Spider impl if needed.
         :param max_p: Maximum amount of processes to run.
         """
+        super().__init__()
         if spider is not None:
             self.spider = spider
         if isinstance(max_p, int) and max_p > 0:
-            self.max_process_count=max_p
-        self.websites=websites
+            self.max_process_count = max_p
+        self.websites = websites
+        self.start()
 
-    def _crawl(self, page):
+    def running_count(self):
         """
-        Process, runs spider's crawl and saves results.
-        :param page: Page entity.
-        :return: shit.
+        Finds how many crawling processes is running.
+        :return: number
         """
-        loading, links=self.spider.crawl_on_page(page)
-        self.websites.saveLoading(loading)
-        if len(links) > 0:
-            for l in links:
-                self.startCrawlingProcess
+        running = 0
+        for p in self.__processes:
+            if p.is_alive():
+                running += 1
+        return running
+
+    def crawl(self, page):
+        """
+        Starts a proccess of crawling on page.
+        :param page: Page or url.
+        """
+        if not isinstance(page, models.Page):
+            url = page
+            page = self.websites.findByUrl(url)
+            if page is None:
+                page = self.websites.createPageFromUrl(url)
+        self.__processes.append(CrawlingProcess(page, self.spider, self.websites))
+
+    def run(self):
+        for p in self.__processes:
+            if not p.is_alive():
+                if not p.finished:
+                    if self.running_count() < self.max_process_count:
+                        p.start()
+                else:
+                    for l in p.resulting_links:
+                        self.crawl(l)
+                    self.__processes.remove(p)
+            time.sleep(1)
+
+    def terminate(self):
+        super().terminate()
+        for p in self.__processes:
+            p.terminate()
+            self.__processes.remove(p)
