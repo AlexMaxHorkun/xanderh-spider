@@ -102,6 +102,7 @@ class SpiderManager(threading.Thread):
         if isinstance(max_p, int) and max_p > 0:
             self.max_process_count = max_p
         self.websites = websites
+        self.start()
 
     def running_count(self):
         """
@@ -117,30 +118,21 @@ class SpiderManager(threading.Thread):
     def crawl(self, page):
         """
         Starts a proccess of crawling on page.
-        :param page: Page or url.
+        :param page: Page.
         """
-        if not isinstance(page, models.Page):
-            url = page
-            page = self.websites.findPageByUrl(url)
-            if page is None:
-                page = self.websites.createPageFromUrl(url)
         self.__processes.append(CrawlingProcess(page, self.spider, self.websites))
 
     def run(self):
-        for p in self.__processes:
-            print("Checkign processes, having %s" % (len(self.__processes)))
-            if not p.is_alive():
-                if not p.finished:
-                    if self.running_count() < self.max_process_count:
-                        p.start()
-                else:
-                    for l in p.resulting_links:
-                        self.crawl(l)
-                    self.__processes.remove(p)
+        while True:
+            for p in self.__processes:
+                if not p.is_alive():
+                    if not p.finished:
+                        if self.running_count() < self.max_process_count:
+                            p.start()
+                    else:
+                        if p.resulting_links is not None:
+                            for l in p.resulting_links:
+                                newpage=models.Page(p.page.website, l)
+                                self.crawl(newpage)
+                        self.__processes.remove(p)
             time.sleep(1)
-
-    def terminate(self):
-        super().terminate()
-        for p in self.__processes:
-            p.terminate()
-            self.__processes.remove(p)
