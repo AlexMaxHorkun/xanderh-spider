@@ -1,16 +1,16 @@
 __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
-from multiprocessing import process
 import threading
 import time
+
 from xanderhorkunspider import loader
 from xanderhorkunspider import parser
 from xanderhorkunspider import models
 
 
 class LoadingEvaluator(object):
-    def evaluateLoading(self, loading):
+    def evaluate_loading(self, loading):
         """
         Determines whether page content is worth while.
         :param loading: Loading object.
@@ -59,29 +59,32 @@ class CrawlingProcess(threading.Thread):
     finished = False
     spider = None
     websites = None
+    evaluator = None
 
-    def __init__(self, page, spider, websites):
+    def __init__(self, page, spider, websites, ev):
         """
         :param page: Page to crawl on.
         :param websites: Websites.
         :param spider: Spider.
+        :param ev: LoadingEvaluator to determine whether to save page or not (if it has ID=0).
         """
         super().__init__()
         self.page = page
         self.spider = spider
         self.websites = websites
+        self.evaluator = ev
 
     def run(self):
         """
         Runs spider's crawl and saves results.
         """
-        print("crawling on %s" % self.page.url)
         loading, links = self.spider.crawl_on_page(self.page)
         self.resulting_links = links
         self.resulting_loading = loading
-        self.websites.saveLoading(loading)
+        if (self.page.id == 0 and self.evaluator.evaluate_loading(loading)) \
+                or not self.page.id == 0:
+            self.websites.save_loading(loading)
         self.finished = True
-        print("finished crawling on %s" % self.page.url)
 
 
 class SpiderManager(threading.Thread):
@@ -89,12 +92,14 @@ class SpiderManager(threading.Thread):
     max_process_count = 50
     __processes = []
     websites = None
+    evaluator = LoadingEvaluator()
 
-    def __init__(self, websites, spider=None, max_p=None):
+    def __init__(self, websites, spider=None, max_p=None, loading_evaluator=None):
         """
         :param websites: Websites domain.
         :param spider: Custom Spider impl if needed.
         :param max_p: Maximum amount of processes to run.
+        :param loading_evaluator: LoadingEvaluator custom impl if needed.
         """
         super().__init__()
         if spider is not None:
@@ -102,6 +107,8 @@ class SpiderManager(threading.Thread):
         if isinstance(max_p, int) and max_p > 0:
             self.max_process_count = max_p
         self.websites = websites
+        if not loading_evaluator is None:
+            self.evaluator = loading_evaluator
         self.start()
 
     def running_count(self):
@@ -120,7 +127,7 @@ class SpiderManager(threading.Thread):
         Starts a proccess of crawling on page.
         :param page: Page.
         """
-        self.__processes.append(CrawlingProcess(page, self.spider, self.websites))
+        self.__processes.append(CrawlingProcess(page, self.spider, self.websites, self.evaluator))
 
     def run(self):
         while True:
@@ -132,7 +139,10 @@ class SpiderManager(threading.Thread):
                     else:
                         if p.resulting_links is not None:
                             for l in p.resulting_links:
-                                newpage=models.Page(p.page.website, l)
-                                self.crawl(newpage)
+                                page = self.websites.find_page_by_url(l)
+                                if page is None:
+                                    page = models.Page(p.page.website, l)
+                                if not page.isloaded():
+                                    self.crawl(page)
                         self.__processes.remove(p)
             time.sleep(1)

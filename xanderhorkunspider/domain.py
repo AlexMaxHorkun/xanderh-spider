@@ -28,19 +28,18 @@ class Websites(object):
             for loading in page.loadings:
                 self._loading_dao.persist(loading)
 
-    def find(self, id):
-        return self._website_dao.find(id)
+    def find(self, wid):
+        return self._website_dao.find(wid)
 
-    def saveLoading(self, loading):
+    def save_loading(self, loading):
         if not loading.page:
             raise ValueError("Loading must have link to page")
-        if loading.id==0:
+        if loading.page.id == 0:
+            self._page_dao.persist(loading.page)
+        if loading.id == 0:
             self._loading_dao.persist(loading)
         else:
             self._loading_dao.save(loading)
 
-    def findPageByUrl(self, url):
-        return self._page_dao.findByUrl(url)
-
-    def createPageFromUrl(self, url):
-        raise NotImplementedError()
+    def find_page_by_url(self, url):
+        return self._page_dao.find_by_url(url)

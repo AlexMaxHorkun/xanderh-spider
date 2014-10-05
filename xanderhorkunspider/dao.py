@@ -4,7 +4,7 @@ __email__ = 'mindkilleralexs@gmail.com'
 
 class PageDao(object):
     """
-    Interface to Page entity's DAO.
+    Interface of Page entity's DAO.
     """
 
     def persist(self, page):
@@ -15,7 +15,7 @@ class PageDao(object):
         """
         raise NotImplementedError()
 
-    def findByUrl(self, url):
+    def find_by_url(self, url):
         """
         Looks for Page entity with such URL.
         :param url: URL property that needed Page entity has.
@@ -52,7 +52,7 @@ class WebsiteDao(object):
         """
         raise NotImplementedError()
 
-    def findByUrl(self, url):
+    def find_by_url(self, url):
         """
         Looks for Website entity with such URL.
         :param url: Homepage property that needed Website entity has.
@@ -78,7 +78,7 @@ class WebsiteDao(object):
 
 class LoadingDao(object):
     """
-    Interface to Loading entity's DAO.
+    Interface of Loading entity's DAO.
     """
 
     def persist(self, loading):
@@ -89,7 +89,7 @@ class LoadingDao(object):
         """
         raise NotImplementedError()
 
-    def findByUrl(self, url):
+    def find_by_url(self, url):
         """
         Looks for Loading entity with such Page's URL.
         :param url: URL property of Page that needed Loading entity has.

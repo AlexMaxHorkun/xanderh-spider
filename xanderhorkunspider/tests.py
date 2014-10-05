@@ -2,9 +2,10 @@ __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
 import unittest
-import httpretty
-import time
 import sys
+
+import httpretty
+
 from xanderhorkunspider import loader
 from xanderhorkunspider import models
 from xanderhorkunspider import parser
@@ -80,7 +81,7 @@ class TestSpider(unittest.TestCase):
 
 
 class MockWebsites(domain.Websites):
-    loadings=[]
+    loadings = []
 
     def __init__(self):
         super().__init__(None, None, None)
@@ -92,14 +93,14 @@ class MockWebsites(domain.Websites):
         return None
 
     def createPageFromUrl(self, url):
-        websites=models.Website("", "", "")
-        page=models.Page(websites, url)
+        websites = models.Website("", "", "")
+        page = models.Page(websites, url)
         return page
 
 
 class TestSpiderManager(unittest.TestCase):
-    mock_host="example.com"
-    mock_base_url="http://somesub."+mock_host+"/somepage"
+    mock_host = "example.com"
+    mock_base_url = "http://somesub." + mock_host + "/somepage"
 
     @httpretty.activate
     def test_threepages(self):
@@ -112,13 +113,13 @@ class TestSpiderManager(unittest.TestCase):
                                body="<p>sup</p><a href=\"page3\">link to 3</a>")
         httpretty.register_uri(httpretty.GET, page2.url+"/page3",
                                body="<div>enough</div>")"""
-        websites=MockWebsites()
-        website=models.Website("http://www.yandex.ru", "Yandex", "yandex.ru")
-        page1=models.Page(website, "http://www.yandex.ua")
-        spdr=spider.Spider(loader.Loader(), parser.OwnLinksParser())
-        spider_manager=spider.SpiderManager(websites, spdr)
+        websites = MockWebsites()
+        website = models.Website("http://www.yandex.ru", "Yandex", "yandex.ru")
+        page1 = models.Page(website, "http://www.yandex.ua")
+        spdr = spider.Spider(loader.Loader(), parser.OwnLinksParser())
+        spider_manager = spider.SpiderManager(websites, spdr)
         spider_manager.crawl(page1)
-        #spider_manager.start()
+        # spider_manager.start()
         while True:
             if len(websites.loadings) > 10:
                 sys.exit(1)
