@@ -54,8 +54,8 @@ class WebsiteDao(object):
 
     def find_by_url(self, url):
         """
-        Looks for Website entity with such URL.
-        :param url: Homepage property that needed Website entity has.
+        Looks for Website entity which owns URL.
+        :param url: URL address.
         :return: Website entity or None.
         """
         raise NotImplementedError()
@@ -109,5 +109,14 @@ class LoadingDao(object):
         """
         Save changes to the Loading entity.
         :param loading: Loading entity.
+        """
+        raise NotImplementedError()
+
+    def find_all(self, limit=0, offset=0):
+        """
+        Gets list of Loadings from storage.
+        :param limit: Max amount of entities to return.
+        :param offset: Start index.
+        :return: List of Loadings.
         """
         raise NotImplementedError()

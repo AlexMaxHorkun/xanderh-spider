@@ -43,3 +43,6 @@ class Websites(object):
 
     def find_page_by_url(self, url):
         return self._page_dao.find_by_url(url)
+
+    def find_loadings(self, l=0, o=0):
+        return self._loading_dao.find_all(limit=l, offset=o)

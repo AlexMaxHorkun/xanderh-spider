@@ -9,18 +9,15 @@ class Website(object):
     Holds data about added websites to parse.
     """
     id = 0
-    homepage = ""
     name = ""
     pages = set()
     host = ""
 
-    def __init__(self, url, name, host):
+    def __init__(self, name, host):
         """
-        :param url: URL address of a main page.
         :param name: Website's name.
         :param host: host that all relative pages share.
         """
-        self.homepage = url
         self.name = name
         self.host = host
 
@@ -61,12 +58,19 @@ class Page(object):
         Returns content of last successful loading.
         :return: Content (HTML) or None
         """
+        loading = self.get_last_successful_loading()
+        if not loading is None:
+            return loading.content
+        else:
+            return None
+
+    def get_last_successful_loading(self):
         last_loading = None
         for l in self.loadings:
             if l.success and (last_loading is None or last_loading.time < l.time):
                 last_loading = l
         if last_loading:
-            return last_loading.content
+            return last_loading
         else:
             return None
 

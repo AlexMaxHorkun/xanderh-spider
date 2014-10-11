@@ -11,6 +11,7 @@ from xanderhorkunspider import models
 from xanderhorkunspider import parser
 from xanderhorkunspider import spider
 from xanderhorkunspider import domain
+from xanderhorkunspider import inmemory_dao
 
 
 class TestLoader(unittest.TestCase):
@@ -46,7 +47,7 @@ class TestLinksParser(unittest.TestCase):
     mock_url = "/someshit"
 
     def test_parse(self):
-        website = models.Website("http://www" + self.mock_host, "Some site", self.mock_host)
+        website = models.Website("Some site", self.mock_host)
         page = models.Page(website, self.mock_page_url + self.mock_url)
         loading = models.Loading(page, True, self.mock_text)
         p = parser.OwnLinksParser()
@@ -69,7 +70,7 @@ class TestSpider(unittest.TestCase):
     def test_crawl(self):
         httpretty.register_uri(httpretty.GET, self.mock_url,
                                body=self.mock_content)
-        website = models.Website(self.mock_url, "Test", self.mock_host)
+        website = models.Website("Test", self.mock_host)
         page = models.Page(website, self.mock_url)
         spdr = spider.Spider()
         loading, links = spdr.crawl_on_page(page)
@@ -80,31 +81,13 @@ class TestSpider(unittest.TestCase):
         self.assertTrue(links == {self.mock_url + "/someotherpage", })
 
 
-class MockWebsites(domain.Websites):
-    loadings = []
-
-    def __init__(self):
-        super().__init__(None, None, None)
-
-    def saveLoading(self, loading):
-        self.loadings.append(loading)
-
-    def findPageByUrl(self, url):
-        return None
-
-    def createPageFromUrl(self, url):
-        websites = models.Website("", "", "")
-        page = models.Page(websites, url)
-        return page
-
-
 class TestSpiderManager(unittest.TestCase):
     mock_host = "example.com"
     mock_base_url = "http://somesub." + mock_host + "/somepage"
 
     @httpretty.activate
     def test_threepages(self):
-        """website=models.Website("http://www."+self.mock_host, "some site", self.mock_host)
+        website=models.Website("some site", self.mock_host)
         page1=models.Page(website,self.mock_base_url)
         page2=models.Page(website, self.mock_base_url+'/page2')
         httpretty.register_uri(httpretty.GET, page1.url,
@@ -112,18 +95,17 @@ class TestSpiderManager(unittest.TestCase):
         httpretty.register_uri(httpretty.GET, page2.url,
                                body="<p>sup</p><a href=\"page3\">link to 3</a>")
         httpretty.register_uri(httpretty.GET, page2.url+"/page3",
-                               body="<div>enough</div>")"""
-        websites = MockWebsites()
-        website = models.Website("http://www.yandex.ru", "Yandex", "yandex.ru")
-        page1 = models.Page(website, "http://www.yandex.ua")
+                               body="<div>enough</div>")
+        websites = domain.Websites(inmemory_dao.InMemoryPageDao(),
+                                   inmemory_dao.InMemoryWebsiteDao(), inmemory_dao.InMemoryLoadingDao())
         spdr = spider.Spider(loader.Loader(), parser.OwnLinksParser())
         spider_manager = spider.SpiderManager(websites, spdr)
         spider_manager.crawl(page1)
-        # spider_manager.start()
-        while True:
-            if len(websites.loadings) > 10:
-                sys.exit(1)
-        """received_links=set()
-        for l in websites.loadings:
+        spider_manager.crawl(page2)
+        spider_manager.stop_when_done=True
+        spider_manager.join()
+        received_links=set()
+        for l in websites.find_loadings():
             received_links.add(l.page.url)
-        self.assertTrue(received_links == {self.mock_base_url, self.mock_base_url+'/page2', page2.url+"/page3"})"""
+        self.assertTrue(received_links == {self.mock_base_url,
+                                           self.mock_base_url+'/page2', page2.url+"/page3"})

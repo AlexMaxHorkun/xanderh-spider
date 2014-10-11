@@ -43,7 +43,10 @@ class Loader(object):
         if timeout is None and self.timeout is not None:
             timeout = self.timeout
 
-        http_response = requests.get(url, timeout=timeout)
+        try:
+            http_response = requests.get(url, timeout=timeout)
+        except:
+            return None
         if not http_response:
             return None
         return LoadResult(url, http_response.headers, http_response.text)

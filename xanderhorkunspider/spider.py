@@ -22,9 +22,13 @@ class LoadingEvaluator(object):
 class Spider(object):
     """
     Gets page content, parses it for new links.
+
+    If use_existing is True then if content is already loaded
+    it will be parsed, not loaded again.
     """
     page_loader = loader.Loader()
     links_parser = parser.OwnLinksParser()
+    use_existing = True
 
     def __init__(self, ldr=None, links_parser=None):
         """
@@ -42,9 +46,12 @@ class Spider(object):
         :param page: Page entity.
         :return: Resulting Loading entity and links list.
         """
-        load_result = self.page_loader.load(page.url)
-        loading = models.Loading(page, not load_result is None, getattr(load_result, "headers", {}),
-                                 getattr(load_result, "body", ""))
+        if self.use_existing and page.isloaded():
+            loading = page.get_last_successful_loading()
+        else:
+            load_result = self.page_loader.load(page.url)
+            loading = models.Loading(page, not load_result is None, getattr(load_result, "headers", {}),
+                                     getattr(load_result, "body", ""))
         if len(loading.content):
             links = self.links_parser.parse(loading)
         else:
@@ -81,8 +88,8 @@ class CrawlingProcess(threading.Thread):
         loading, links = self.spider.crawl_on_page(self.page)
         self.resulting_links = links
         self.resulting_loading = loading
-        if (self.page.id == 0 and self.evaluator.evaluate_loading(loading)) \
-                or not self.page.id == 0:
+        if (loading.id == 0 and loading.page,id==0 and self.evaluator.evaluate_loading(loading)) \
+                or not loading.page.id==0:
             self.websites.save_loading(loading)
         self.finished = True
 
@@ -93,6 +100,8 @@ class SpiderManager(threading.Thread):
     __processes = []
     websites = None
     evaluator = LoadingEvaluator()
+    update_existing = False
+    stop_when_done=False
 
     def __init__(self, websites, spider=None, max_p=None, loading_evaluator=None):
         """
@@ -104,6 +113,7 @@ class SpiderManager(threading.Thread):
         super().__init__()
         if spider is not None:
             self.spider = spider
+        self.spider.use_existing = not self.update_existing
         if isinstance(max_p, int) and max_p > 0:
             self.max_process_count = max_p
         self.websites = websites
@@ -121,6 +131,17 @@ class SpiderManager(threading.Thread):
             if p.is_alive():
                 running += 1
         return running
+
+    def is_done(self):
+        """
+        Check if no processes are running or in queue.
+        :return: bool.
+        """
+        for p in self.__processes:
+            if not p.finished:
+                return False
+
+        return True
 
     def crawl(self, page):
         """
@@ -142,7 +163,9 @@ class SpiderManager(threading.Thread):
                                 page = self.websites.find_page_by_url(l)
                                 if page is None:
                                     page = models.Page(p.page.website, l)
-                                if not page.isloaded():
+                                if not page.isloaded() or self.update_existing:
                                     self.crawl(page)
                         self.__processes.remove(p)
+                if self.stop_when_done and self.is_done():
+                    break
             time.sleep(1)
