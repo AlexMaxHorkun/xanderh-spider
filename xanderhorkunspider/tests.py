@@ -2,7 +2,6 @@ __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
 import unittest
-import sys
 
 import httpretty
 
@@ -50,7 +49,7 @@ class TestLinksParser(unittest.TestCase):
         website = models.Website("Some site", self.mock_host)
         page = models.Page(website, self.mock_page_url + self.mock_url)
         loading = models.Loading(page, True, self.mock_text)
-        p = parser.OwnLinksParser()
+        p = parser.LinksParser()
         links = p.parse(loading)
         testlinks = {self.mock_page_url + '/relative-link/23', 'http://ohersubdomain.example.com/someshit',
                      "http://" + self.mock_host + '/gofuckyourself',
@@ -87,25 +86,25 @@ class TestSpiderManager(unittest.TestCase):
 
     @httpretty.activate
     def test_threepages(self):
-        website=models.Website("some site", self.mock_host)
-        page1=models.Page(website,self.mock_base_url)
-        page2=models.Page(website, self.mock_base_url+'/page2')
+        website = models.Website("some site", self.mock_host)
+        page1 = models.Page(website, self.mock_base_url)
+        page2 = models.Page(website, self.mock_base_url + '/page2')
         httpretty.register_uri(httpretty.GET, page1.url,
                                body="<p>somestuff</p>")
         httpretty.register_uri(httpretty.GET, page2.url,
                                body="<p>sup</p><a href=\"page3\">link to 3</a>")
-        httpretty.register_uri(httpretty.GET, page2.url+"/page3",
+        httpretty.register_uri(httpretty.GET, page2.url + "/page3",
                                body="<div>enough</div>")
         websites = domain.Websites(inmemory_dao.InMemoryPageDao(),
                                    inmemory_dao.InMemoryWebsiteDao(), inmemory_dao.InMemoryLoadingDao())
-        spdr = spider.Spider(loader.Loader(), parser.OwnLinksParser())
+        spdr = spider.Spider(loader.Loader(), parser.LinksParser())
         spider_manager = spider.SpiderManager(websites, spdr)
         spider_manager.crawl(page1)
         spider_manager.crawl(page2)
-        spider_manager.stop_when_done=True
+        spider_manager.stop_when_done = True
         spider_manager.join()
-        received_links=set()
+        received_links = set()
         for l in websites.find_loadings():
             received_links.add(l.page.url)
         self.assertTrue(received_links == {self.mock_base_url,
-                                           self.mock_base_url+'/page2', page2.url+"/page3"})
+                                           self.mock_base_url + '/page2', page2.url + "/page3"})

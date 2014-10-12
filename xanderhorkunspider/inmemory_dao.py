@@ -37,13 +37,13 @@ class InMemoryLoadingDao(dao.LoadingDao):
         pass
 
     def find_all(self, limit=0, offset=0):
-        loadings=[]
+        loadings = []
         for lid, l in self.__loadings:
             loadings.append(l)
         if offset > 0:
-            loadings=loadings[offset:]
+            loadings = loadings[offset:]
         if limit > 0:
-            loadings=loadings[:limit]
+            loadings = loadings[:limit]
         return loadings
 
 

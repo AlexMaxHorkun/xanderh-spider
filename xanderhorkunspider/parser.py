@@ -10,16 +10,18 @@ class LinksParser(object):
     Gets links out of html.
     """
 
-    def _validateurl(self, page, url):
+    def _validateurl(self, loading, url):
         """
         Validates received urls.
 
-        :param page: Page object.
+        :param loading: Loading object.
         :param url: link
         :return: true or false
         """
         urldata = urllib.parse.urlparse(url)
-        return urldata.scheme in ('http', 'https')
+        valid_protoloc = urldata.scheme in ('http', 'https')
+        valid_host = urllib.parse.urlparse(url).netloc.endswith(loading.page.website.host)
+        return valid_host and valid_protoloc
 
     def parse(self, loading):
         match = re.findall(r'<a\s.*?href="(.*?)".*?>', loading.content)
@@ -36,15 +38,3 @@ class LinksParser(object):
             if self._validateurl(loading, url):
                 urls.add(url)
         return urls
-
-
-class OwnLinksParser(LinksParser):
-    """
-    Allows only links referencing same host
-    """
-
-    def _validateurl(self, loading, url):
-        valid = super()._validateurl(loading, url)
-        if valid:
-            return urllib.parse.urlparse(url).netloc.endswith(loading.page.website.host)
-        return valid

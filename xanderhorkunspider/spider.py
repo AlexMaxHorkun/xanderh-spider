@@ -27,7 +27,7 @@ class Spider(object):
     it will be parsed, not loaded again.
     """
     page_loader = loader.Loader()
-    links_parser = parser.OwnLinksParser()
+    links_parser = parser.LinksParser()
     use_existing = True
 
     def __init__(self, ldr=None, links_parser=None):
@@ -88,8 +88,8 @@ class CrawlingProcess(threading.Thread):
         loading, links = self.spider.crawl_on_page(self.page)
         self.resulting_links = links
         self.resulting_loading = loading
-        if (loading.id == 0 and loading.page,id==0 and self.evaluator.evaluate_loading(loading)) \
-                or not loading.page.id==0:
+        if (loading.id == 0 and loading.page, id == 0 and self.evaluator.evaluate_loading(loading)) \
+                or not loading.page.id == 0:
             self.websites.save_loading(loading)
         self.finished = True
 
@@ -101,7 +101,7 @@ class SpiderManager(threading.Thread):
     websites = None
     evaluator = LoadingEvaluator()
     update_existing = False
-    stop_when_done=False
+    stop_when_done = False
 
     def __init__(self, websites, spider=None, max_p=None, loading_evaluator=None):
         """
@@ -150,21 +150,38 @@ class SpiderManager(threading.Thread):
         """
         self.__processes.append(CrawlingProcess(page, self.spider, self.websites, self.evaluator))
 
+    def _start_process(self, crawling_process):
+        """
+        When finds not yet started crawling process starts it if possible.
+
+        :param crawling_process: CrawlingProcess.
+        """
+        if self.running_count() < self.max_process_count:
+            crawling_process.start()
+
+    def _process_crawling_result(self, crawling_process):
+        """
+        Processes crawling process when it's finished, creates new
+        crawling processes for received links from page's body.
+
+        :param crawling_process: CrawlingProcess
+        """
+        if crawling_process.resulting_links is not None:
+            for l in crawling_process.resulting_links:
+                page = self.websites.find_page_by_url(l)
+                if page is None:
+                    page = models.Page(crawling_process.page.website, l)
+                if not page.isloaded() or self.update_existing:
+                    self.crawl(page)
+
     def run(self):
         while True:
             for p in self.__processes:
                 if not p.is_alive():
                     if not p.finished:
-                        if self.running_count() < self.max_process_count:
-                            p.start()
+                        self._start_process(p)
                     else:
-                        if p.resulting_links is not None:
-                            for l in p.resulting_links:
-                                page = self.websites.find_page_by_url(l)
-                                if page is None:
-                                    page = models.Page(p.page.website, l)
-                                if not page.isloaded() or self.update_existing:
-                                    self.crawl(page)
+                        self._process_crawling_result(p)
                         self.__processes.remove(p)
                 if self.stop_when_done and self.is_done():
                     break
