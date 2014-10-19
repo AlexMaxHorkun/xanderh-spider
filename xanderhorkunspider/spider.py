@@ -170,7 +170,9 @@ class SpiderManager(threading.Thread):
             for l in crawling_process.resulting_links:
                 page = self.websites.find_page_by_url(l)
                 if page is None:
-                    page = models.Page(crawling_process.page.website, l)
+                    page = models.Page()
+                    page.url = l
+                    page.website = crawling_process.page.website
                 if not page.isloaded() or self.update_existing:
                     self.crawl(page)
 

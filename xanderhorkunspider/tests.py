@@ -47,8 +47,13 @@ class TestLinksParser(unittest.TestCase):
 
     def test_parse(self):
         website = models.Website("Some site", self.mock_host)
-        page = models.Page(website, self.mock_page_url + self.mock_url)
-        loading = models.Loading(page, True, self.mock_text)
+        page = models.Page()
+        page.website = website
+        page.url = self.mock_page_url + self.mock_url
+        loading = models.Loading()
+        loading.page = page
+        loading.success = True
+        loading.content = self.mock_text
         p = parser.LinksParser()
         links = p.parse(loading)
         testlinks = {self.mock_page_url + '/relative-link/23', 'http://ohersubdomain.example.com/someshit',
@@ -69,8 +74,12 @@ class TestSpider(unittest.TestCase):
     def test_crawl(self):
         httpretty.register_uri(httpretty.GET, self.mock_url,
                                body=self.mock_content)
-        website = models.Website("Test", self.mock_host)
-        page = models.Page(website, self.mock_url)
+        website = models.Website()
+        website.name = "Test"
+        website.host = self.mock_host
+        page = models.Page()
+        page.website = website
+        page.url = self.mock_url
         spdr = spider.Spider()
         loading, links = spdr.crawl_on_page(page)
         self.assertTrue(isinstance(loading, models.Loading))
@@ -86,9 +95,15 @@ class TestSpiderManager(unittest.TestCase):
 
     @httpretty.activate
     def test_threepages(self):
-        website = models.Website("some site", self.mock_host)
-        page1 = models.Page(website, self.mock_base_url)
-        page2 = models.Page(website, self.mock_base_url + '/page2')
+        website = models.Website()
+        website.name = "some site"
+        website.host = self.mock_host
+        page1 = models.Page()
+        page1.website = website
+        page1.url = self.mock_base_url
+        page2 = models.Page()
+        page2.website = website
+        page2.url = self.mock_base_url + '/page2'
         httpretty.register_uri(httpretty.GET, page1.url,
                                body="<p>somestuff</p>")
         httpretty.register_uri(httpretty.GET, page2.url,

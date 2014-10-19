@@ -1,8 +1,9 @@
 __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
-from xanderhorkunspider.models import Website
 from django.db import models
+
+from xanderhorkunspider.models import Website
 
 
 class WebsitesModel(models.Model, Website):
@@ -14,7 +15,4 @@ class WebsitesModel(models.Model, Website):
         return self.name
 
     class Meta:
-        db_table="websites"
-
-    def __init__(self, *args, **kwargs):
-        super(models.Model, self).__init__(self, args, kwargs)
+        db_table = "websites"

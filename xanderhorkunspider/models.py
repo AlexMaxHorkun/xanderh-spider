@@ -1,8 +1,6 @@
 __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
-import datetime
-
 
 class Website(object):
     """
@@ -13,14 +11,6 @@ class Website(object):
     pages = set()
     host = ""
 
-    def __init__(self, name, host):
-        """
-        :param name: Website's name.
-        :param host: host that all relative pages share.
-        """
-        self.name = name
-        self.host = host
-
 
 class Page(object):
     """
@@ -30,17 +20,6 @@ class Page(object):
     url = ""
     website = None
     loadings = []
-
-    def __init__(self, website, url):
-        """
-        Initiates obj with it's url and other attrs.
-
-        :param url: Address.
-        :param website: Website that this page belongs.
-        """
-        self.url = url
-        self.website = website
-        website.pages.add(self)
 
     def isloaded(self):
         """
@@ -85,19 +64,3 @@ class Loading(object):
     headers = {}
     content = ""
     time = None
-
-    def __init__(self, page, success, headers={}, content="", time=datetime.datetime.now()):
-        """
-        :param page: link to Page object.
-        :param success: Whether page loading was successful.
-        :param headers: Headers dict.
-        :param content: Page's content (HTML).
-        :param time: Date and time when loading was finished.
-        """
-        self.content = content
-        self.headers = dict((k.lower(), v.lower) for k, v in headers.items())
-        self.page = page
-        if self not in page.loadings:
-            page.loadings.append(self)
-        self.success = success
-        self.time = time
