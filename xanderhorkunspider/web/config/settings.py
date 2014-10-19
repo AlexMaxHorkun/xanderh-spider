@@ -10,6 +10,9 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from xanderhorkunspider.web.config import local_settings
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
@@ -24,6 +27,8 @@ DEBUG = True
 
 TEMPLATE_DEBUG = True
 
+TEMPLATE_DIRS = (BASE_DIR + '/templates',)
+
 ALLOWED_HOSTS = []
 
 
@@ -36,6 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'xanderhorkunspider.web.websites',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -58,8 +64,12 @@ WSGI_APPLICATION = 'xanderhorkunspider.web.config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': local_settings.DB_ENGINE,
+        'NAME': local_settings.DB_NAME,
+        'USER': local_settings.DB_USER,
+        'PASSWORD': local_settings.PASSWORD,
+        'HOST': local_settings.DB_HOST,
+        'PORT': local_settings.DB_PORT
     }
 }
 

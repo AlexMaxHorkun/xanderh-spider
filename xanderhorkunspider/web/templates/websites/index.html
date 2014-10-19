@@ -1,0 +1,10 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <h2>Websites list:</h2>
+    <ul>
+        {% for w in websites %}
+        <li>{{ w }}</li>
+        {% endfor %}
+    </ul>
+    {% debug %}
+{% endblock content %}
