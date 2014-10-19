@@ -68,6 +68,15 @@ class WebsiteDao(object):
         """
         raise NotImplementedError()
 
+    def find_all(self, offset=0, limit=0):
+        """
+        Gets list of Websites.
+        :param offset: Start index.
+        :param limit: Max amount to return.
+        :return: List.
+        """
+        raise NotImplementedError()
+
     def save(self, website):
         """
         Save changes to the Website entity.

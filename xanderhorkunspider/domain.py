@@ -46,3 +46,12 @@ class Websites(object):
 
     def find_loadings(self, l=0, o=0):
         return self._loading_dao.find_all(limit=l, offset=o)
+
+    def find_websites(self, l=0, o=0):
+        """
+        Gets list of websites.
+        :param l: Max amount of items.
+        :param o: Offset.
+        :return: List.
+        """
+        return self._website_dao.find_all(limit=l, offset=o)

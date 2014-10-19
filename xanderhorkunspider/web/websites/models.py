@@ -4,6 +4,7 @@ __email__ = 'mindkilleralexs@gmail.com'
 from django.db import models
 
 from xanderhorkunspider.models import Website
+from xanderhorkunspider.dao import WebsiteDao
 
 
 class WebsitesModel(models.Model, Website):
@@ -16,3 +17,13 @@ class WebsitesModel(models.Model, Website):
 
     class Meta:
         db_table = "websites"
+
+
+class WebsitesDBDao(WebsiteDao):
+    def find_all(self, offset=0, limit=0):
+        query = WebsitesModel.objects.all()
+        if limit > 0:
+            query = query[:limit]
+        if offset > 0:
+            query = query[offset:]
+        return list(query)
