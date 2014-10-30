@@ -1,5 +1,34 @@
 {% extends 'layout.html' %}
 {% block content %}
     <h1>Add a Website</h1>
-
+    <form method="post">
+        <label>
+            Host:
+            {{ form.host }}
+        </label>
+        {% if form.host.errors %}
+            <div class="form-errors">
+                List of errors of host field:
+                {% for error in form.host.errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <br><br>
+        <label>
+            Name:
+            {{ form.name }}
+        </label>
+        {% if form.name.errors %}
+            <div class="form-errors">
+                List of errors of name field:
+                {% for error in form.name.errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <br><br>
+        <input type="submit" value="Create">
+        {% csrf_token %}
+    </form>
 {% endblock content %}

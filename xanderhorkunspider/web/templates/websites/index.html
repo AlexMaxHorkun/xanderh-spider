@@ -1,9 +1,12 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <h2>Websites list:</h2>
-    <ul>
-        {% for w in websites %}
-        <li>{{ w }}</li>
-        {% endfor %}
-    </ul>
+    <div id="create-new-button"><a href="{% url 'add_website' %}">Create new website</a></div>
+    <div id="websites-list">
+        <h2>Websites list:</h2>
+        <ul>
+            {% for w in websites %}
+                <li>"{{ w.name }}", host - {{ w.host }}</li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock content %}

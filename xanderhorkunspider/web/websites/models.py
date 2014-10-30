@@ -27,3 +27,11 @@ class WebsitesDBDao(WebsiteDao):
         if offset > 0:
             query = query[offset:]
         return list(query)
+
+    def persist(self, website):
+        if isinstance(website, WebsitesModel):
+            website.save()
+        else:
+            websiteModel = WebsitesModel(host=website.host, name=website.name)
+            websiteModel.save()
+            website.id = websiteModel.id
