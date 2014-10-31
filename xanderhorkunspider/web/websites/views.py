@@ -64,15 +64,20 @@ def delete_website_view(request, wid=None):
 
 def edit_page_view(request, pid=None, wid=None):
     template = 'websites/edit_page.html'
-    websites = domain.Websites(dao.PageDao(), models.WebsitesDBDao(), dao.LoadingDao())
+    websites = domain.Websites(models.PagesDBDao(), models.WebsitesDBDao(), dao.LoadingDao())
     website = None
     page = None
-    if wid:
-        website = websites.find(wid)
     if pid:
         page = websites.find_page(pid)
         if not page:
             raise http.Http404()
+    else:
+        page = models.PageModel()
+    if wid:
+        website = websites.find(wid)
+        if not website:
+            raise http.Http404()
+        page.website = website
     if request.method == 'POST':
         form = forms.PageForm(request.POST, instance=page)
         if form.is_valid():
@@ -80,4 +85,4 @@ def edit_page_view(request, pid=None, wid=None):
             return shortcuts.redirect(shortcuts.resolve_url('index'))
     else:
         form = forms.PageForm(instance=page)
-    return shortcuts.render(request, template, {'website': website, 'form': form})
+    return shortcuts.render(request, template, {'page': page, 'form': form})

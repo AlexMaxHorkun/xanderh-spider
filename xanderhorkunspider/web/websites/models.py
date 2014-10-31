@@ -20,6 +20,10 @@ class WebsitesModel(models.Model, Website):
     class Meta:
         db_table = "websites"
 
+    @property
+    def pages(self):
+        return self.pages_set.all()
+
 
 class WebsitesDBDao(WebsiteDao):
     def find_all(self, offset=0, limit=0):
@@ -63,6 +67,7 @@ class WebsitesDBDao(WebsiteDao):
             model.id = entity.id
         model.host = entity.host
         model.name = entity.name
+        model.pages = entity.pages
 
     def delete(self, wid):
         website = WebsitesModel.objects.get(pk=wid)
@@ -74,7 +79,7 @@ class WebsitesDBDao(WebsiteDao):
 class PageModel(models.Model, Page):
     id = models.AutoField(primary_key=True)
     url = models.CharField(max_length=255)
-    website = models.ForeignKey(WebsitesModel)
+    website = models.ForeignKey(WebsitesModel, related_name='pages_set')
 
     def __str__(self):
         return self.url
@@ -86,3 +91,48 @@ class PageModel(models.Model, Page):
 class PagesDBDao(PageDao):
     def find(self, pid):
         return PageModel.objects.get(pk=pid)
+
+    @classmethod
+    def _entity_to_model(cls, entity, model):
+        """
+        Copies field values from simple entity to model.
+        :param entity: Simple page entity.
+        :param model: Page model that extends django's model.
+        """
+        if (not entity.id is None) and entity.id > 0:
+            model.id = entity.id
+        model.url = entity.url
+        model.website = entity.website
+
+    def persist(self, page):
+        if not isinstance(page, PageModel):
+            pageModel = PageModel()
+            PagesDBDao._entity_to_model(page, pageModel)
+            pageModel.save()
+            page.id = pageModel.id
+        else:
+            page.save()
+
+    def save(self, page):
+        if not isinstance(page, PageModel):
+            pageModel = PageModel()
+            PagesDBDao._entity_to_model(page, pageModel)
+            pageModel.save()
+        else:
+            page.save()
+
+    def delete(self, page):
+        if isinstance(page, PageModel):
+            page.delete()
+        elif isinstance(page, Page):
+            pageModel = PageModel.objects.get(pk=page.id)
+            if pageModel:
+                pageModel.delete()
+            else:
+                raise ValueError("Page with ID %d not found" % page)
+        else:
+            pageModel = PageModel.objects.get(pk=page)
+            if pageModel:
+                pageModel.delete()
+            else:
+                raise ValueError("Page with ID %d not found" % page)

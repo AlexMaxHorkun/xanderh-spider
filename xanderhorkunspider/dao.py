@@ -38,6 +38,13 @@ class PageDao(object):
         """
         raise NotImplementedError()
 
+    def delete(self, page):
+        """
+        Deletes page entity.
+        :param page: Page entity or ID.
+        """
+        raise NotImplementedError()
+
 
 class WebsiteDao(object):
     """
