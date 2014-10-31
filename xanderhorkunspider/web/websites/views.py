@@ -86,3 +86,15 @@ def edit_page_view(request, pid=None, wid=None):
     else:
         form = forms.PageForm(instance=page)
     return shortcuts.render(request, template, {'page': page, 'form': form})
+
+
+def delete_page(request, pid):
+    websites = domain.Websites(models.PagesDBDao(), models.WebsitesDBDao(), dao.LoadingDao())
+    page = websites.find_page(pid)
+    if not page:
+        raise http.Http404()
+    if request.method == 'POST':
+        websites.remove_page(page)
+        return shortcuts.redirect(shortcuts.resolve_url('index'))
+    else:
+        return shortcuts.render(request, 'websites/delete_page.html', {'page': page})

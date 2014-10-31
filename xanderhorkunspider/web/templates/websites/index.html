@@ -12,7 +12,11 @@
                     <ul>
                         <li><a href="{% url 'add_page_to_website' wid=w.id %}">Add a page</a></li>
                         {% for p in w.pages %}
-                            <li>{{ p.url }} <a href="{% url 'edit_page' pid=p.id %}">Edit page</a></li>
+                            <li>
+                                {{ p.url }}
+                                <a href="{% url 'edit_page' pid=p.id %}">Edit page</a>
+                                <a href="{% url 'delete_page' p.id %}">Delete page</a>
+                            </li>
                         {% endfor %}
                     </ul>
                 </li>

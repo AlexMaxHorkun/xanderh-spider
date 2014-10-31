@@ -122,17 +122,8 @@ class PagesDBDao(PageDao):
             page.save()
 
     def delete(self, page):
-        if isinstance(page, PageModel):
-            page.delete()
-        elif isinstance(page, Page):
-            pageModel = PageModel.objects.get(pk=page.id)
-            if pageModel:
-                pageModel.delete()
-            else:
-                raise ValueError("Page with ID %d not found" % page)
+        pageModel = PageModel.objects.get(pk=page)
+        if pageModel:
+            pageModel.delete()
         else:
-            pageModel = PageModel.objects.get(pk=page)
-            if pageModel:
-                pageModel.delete()
-            else:
-                raise ValueError("Page with ID %d not found" % page)
+            raise ValueError("Page with ID %d not found" % page)

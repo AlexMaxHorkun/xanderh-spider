@@ -41,7 +41,7 @@ class PageDao(object):
     def delete(self, page):
         """
         Deletes page entity.
-        :param page: Page entity or ID.
+        :param page: Page's ID.
         """
         raise NotImplementedError()
 

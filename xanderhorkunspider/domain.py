@@ -94,3 +94,15 @@ class Websites(object):
             self._page_dao.persist(page)
         else:
             self._page_dao.save(page)
+
+    def remove_page(self, page):
+        """
+        Deletes page.
+        :param page: Page entity or ID
+        :return:
+        """
+        if isinstance(page, models.Page):
+            pid = page.id
+        else:
+            pid = page
+        self._page_dao.delete(pid)

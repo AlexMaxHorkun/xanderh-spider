@@ -1,0 +1,6 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <h2>Do you really want to delete page "{{ page.url }}" from website "{{ page.website.name }}"?</h2>
+    <form method="post">{% csrf_token %}<input type="submit" value="Yes"></form>
+    <a href="{% url 'index' %}">No, cancel</a>
+{% endblock content %}
