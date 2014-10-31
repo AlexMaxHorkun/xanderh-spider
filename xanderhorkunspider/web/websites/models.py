@@ -4,7 +4,9 @@ __email__ = 'mindkilleralexs@gmail.com'
 from django.db import models
 
 from xanderhorkunspider.models import Website
+from xanderhorkunspider.models import Page
 from xanderhorkunspider.dao import WebsiteDao
+from xanderhorkunspider.dao import PageDao
 
 
 class WebsitesModel(models.Model, Website):
@@ -67,3 +69,20 @@ class WebsitesDBDao(WebsiteDao):
         if not website:
             raise ValueError("Website with id = %d not found" % wid)
         website.delete()
+
+
+class PageModel(models.Model, Page):
+    id = models.AutoField(primary_key=True)
+    url = models.CharField(max_length=255)
+    website = models.ForeignKey(WebsitesModel)
+
+    def __str__(self):
+        return self.url
+
+    class Meta:
+        db_table = "pages"
+
+
+class PagesDBDao(PageDao):
+    def find(self, pid):
+        return PageModel.objects.get(pk=pid)

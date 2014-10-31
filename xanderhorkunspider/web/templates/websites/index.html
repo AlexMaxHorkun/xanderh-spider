@@ -1,12 +1,21 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <div id="create-new-button"><a href="{% url 'add_website' %}">Create new website</a></div>
+    <div id="create-new-button"><a href="{% url 'add_website' %}">Create new website</a> <a href="{% url 'add_page' %}">Create
+        a page</a></div>
     <div id="websites-list">
         <h2>Websites list:</h2>
         <ul>
             {% for w in websites %}
-                <li>"{{ w.name }}", host - {{ w.host }} <a href="{% url 'edit_website' wid=w.id %}">Edit</a> <a
-                        href="{% url 'delete_website' wid=w.id %}">Delete</a></li>
+                <li>
+                    "{{ w.name }}", host - {{ w.host }} <a href="{% url 'edit_website' wid=w.id %}">Edit</a>
+                    <a href="{% url 'delete_website' wid=w.id %}">Delete</a>
+                    <ul>
+                        <li><a href="{% url 'add_page_to_website' wid=w.id %}">Add a page</a></li>
+                        {% for p in w.pages %}
+                            <li>{{ p.url }} <a href="{% url 'edit_page' pid=p.id %}">Edit page</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
             {% endfor %}
         </ul>
     </div>

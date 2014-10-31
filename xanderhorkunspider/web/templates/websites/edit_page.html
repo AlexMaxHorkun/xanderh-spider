@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <h1>
+        {% if not page %}
+            Create a page
+            {% if website %}
+                for website "{{ website.name }}"
+            {% endif %}
+        {% else %}
+            Edit page
+        {% endif %}
+    </h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="url-field">URL:</label>
+        <input type="url" name="url" id="url-field" value="{{ form.fields.url.value }}">
+        <br>
+        <br>
+        <label for="website-field">Website:</label>
+        <select id="website-field" name="website">
+            {% for value, option in form.fields.website.choices %}
+                <option value="{{ value }}">{{ option }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Save">
+    </form>
+{% endblock content %}

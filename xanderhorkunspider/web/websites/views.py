@@ -60,3 +60,24 @@ def delete_website_view(request, wid=None):
         return shortcuts.redirect(shortcuts.resolve_url('index'))
     else:
         return shortcuts.render(request, template, {'website': website})
+
+
+def edit_page_view(request, pid=None, wid=None):
+    template = 'websites/edit_page.html'
+    websites = domain.Websites(dao.PageDao(), models.WebsitesDBDao(), dao.LoadingDao())
+    website = None
+    page = None
+    if wid:
+        website = websites.find(wid)
+    if pid:
+        page = websites.find_page(pid)
+        if not page:
+            raise http.Http404()
+    if request.method == 'POST':
+        form = forms.PageForm(request.POST, instance=page)
+        if form.is_valid():
+            websites.save_page(page)
+            return shortcuts.redirect(shortcuts.resolve_url('index'))
+    else:
+        form = forms.PageForm(instance=page)
+    return shortcuts.render(request, template, {'website': website, 'form': form})

@@ -76,3 +76,21 @@ class Websites(object):
         else:
             wid = int(website)
         self._website_dao.delete(wid)
+
+    def find_page(self, pid):
+        """
+        Finds a page by ID.
+        :param pid: Page's ID.
+        :return: Page.
+        """
+        return self._page_dao.find(pid)
+
+    def save_page(self, page):
+        """
+        Persists of saves page.
+        :param page: Page entity.
+        """
+        if page.id:
+            self._page_dao.persist(page)
+        else:
+            self._page_dao.save(page)
