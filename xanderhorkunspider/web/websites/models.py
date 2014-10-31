@@ -32,6 +32,38 @@ class WebsitesDBDao(WebsiteDao):
         if isinstance(website, WebsitesModel):
             website.save()
         else:
-            websiteModel = WebsitesModel(host=website.host, name=website.name)
+            websiteModel = WebsitesModel()
+            WebsitesDBDao._entity_to_model(website, websiteModel)
             websiteModel.save()
             website.id = websiteModel.id
+
+    def save(self, website):
+        if isinstance(website, WebsitesModel):
+            website.save()
+        else:
+            websiteModel = WebsitesModel.objects.get(pk=website.id)
+            if not websiteModel:
+                raise RuntimeError()
+            WebsitesDBDao._entity_to_model(website, websiteModel)
+            websiteModel.save()
+
+    def find(self, wid):
+        return WebsitesModel.objects.get(pk=wid)
+
+    @classmethod
+    def _entity_to_model(cls, entity, model):
+        """
+        Copies field values from simple entityt to model.
+        :param entity: Simple website entity.
+        :param model: Website model that extends django's model.
+        """
+        if (not entity.id is None) and entity.id > 0:
+            model.id = entity.id
+        model.host = entity.host
+        model.name = entity.name
+
+    def delete(self, wid):
+        website = WebsitesModel.objects.get(pk=wid)
+        if not website:
+            raise ValueError("Website with id = %d not found" % wid)
+        website.delete()

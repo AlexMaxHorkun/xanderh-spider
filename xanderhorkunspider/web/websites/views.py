@@ -2,6 +2,7 @@ __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
 from django import shortcuts
+from django import http
 
 from xanderhorkunspider import domain
 from xanderhorkunspider import dao
@@ -20,17 +21,42 @@ def index_view(request):
     return shortcuts.render_to_response('websites/index.html', {'websites': websites})
 
 
-def add_website_view(request):
+def edit_website_view(request, wid=None):
     template = 'websites/add_website.html';
-    websites = domain.Websites(dao.PageDao(), models.WebsitesDBDao(), dao.LoadingDao());
+    websites = domain.Websites(dao.PageDao(), models.WebsitesDBDao(), dao.LoadingDao())
+    website = None
+    if not wid is None:
+        website = websites.find(wid)
+    if not website:
+        website = models.WebsitesModel()
     if request.method == 'POST':
         form = forms.WebsiteForm(request.POST)
         if form.is_valid():
-            website = models.WebsitesModel()
             website.host = form.cleaned_data['host'];
             website.name = form.cleaned_data['name'];
-            websites.persist(website)
-            return shortcuts.redirect('/')
+            if not website.id:
+                websites.persist(website)
+            else:
+                websites.save(website)
+            return shortcuts.redirect(shortcuts.resolve_url('index'))
     else:
-        form = forms.WebsiteForm()
-    return shortcuts.render(request, template, {'form': form});
+        formData = None
+        if website.id:
+            formData = {}
+            formData['name'] = website.name
+            formData['host'] = website.host
+        form = forms.WebsiteForm(formData)
+    return shortcuts.render(request, template, {'form': form, 'website': website})
+
+
+def delete_website_view(request, wid=None):
+    template = 'websites/delete_website.html'
+    websites = domain.Websites(dao.PageDao(), models.WebsitesDBDao(), dao.LoadingDao())
+    website = websites.find(wid)
+    if not website:
+        raise http.Http404
+    if request.method == 'POST':
+        websites.remove(website)
+        return shortcuts.redirect(shortcuts.resolve_url('index'))
+    else:
+        return shortcuts.render(request, template, {'website': website})

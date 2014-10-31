@@ -5,7 +5,8 @@
         <h2>Websites list:</h2>
         <ul>
             {% for w in websites %}
-                <li>"{{ w.name }}", host - {{ w.host }}</li>
+                <li>"{{ w.name }}", host - {{ w.host }} <a href="{% url 'edit_website' wid=w.id %}">Edit</a> <a
+                        href="{% url 'delete_website' wid=w.id %}">Delete</a></li>
             {% endfor %}
         </ul>
     </div>

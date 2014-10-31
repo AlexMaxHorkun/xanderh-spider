@@ -5,9 +5,10 @@
     <title>{% block title %}Alexander Gorkun's spider{% endblock title %}</title>
 </head>
 <body>
-    <div id="header">{% block header %}Welcome!{% endblock header %}</div>
-    <div id="content">
-        {% block content %}{% endblock content %}
-    </div>
+<div id="header">{% block header %}Welcome!{% endblock header %}</div>
+<div id="menu">Menu: <a href="{% url 'index' %}">Websites</a></div>
+<div id="content">
+    {% block content %}{% endblock content %}
+</div>
 </body>
 </html>

@@ -1,6 +1,12 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <h1>Add a Website</h1>
+    <h1>
+        {% if website.id %}
+            Edit "{{ website.name }}"
+        {% else %}
+            Add a Website
+        {% endif %}
+    </h1>
     <form method="post">
         <label>
             Host:
@@ -28,7 +34,7 @@
             </div>
         {% endif %}
         <br><br>
-        <input type="submit" value="Create">
+        <input type="submit" value="Save">
         {% csrf_token %}
     </form>
 {% endblock content %}

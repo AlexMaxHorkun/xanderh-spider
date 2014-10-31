@@ -1,0 +1,6 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <h2>Do you really want to delete website "{{ website.name }}" with host - {{ website.host }}?</h2>
+    <form method="post">{% csrf_token %}<input type="submit" value="Yes"></form>
+    <a href="{% url 'index' %}">No, cancel</a>
+{% endblock content %}

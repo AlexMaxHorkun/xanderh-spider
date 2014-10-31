@@ -1,6 +1,8 @@
 __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
+from xanderhorkunspider import models
+
 
 class Websites(object):
     _page_dao = None
@@ -55,3 +57,22 @@ class Websites(object):
         :return: List.
         """
         return self._website_dao.find_all(limit=l, offset=o)
+
+    def save(self, website):
+        """
+        Saves changes to a website.
+        :param website: Website entity.
+        """
+        self._website_dao.save(website)
+
+    def remove(self, website):
+        """
+        Deletes a website.
+        :param website: Website entity or ID.
+        """
+        wid = 0
+        if isinstance(website, models.Website):
+            wid = website.id
+        else:
+            wid = int(website)
+        self._website_dao.delete(wid)

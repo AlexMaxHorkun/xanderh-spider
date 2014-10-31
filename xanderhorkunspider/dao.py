@@ -84,6 +84,13 @@ class WebsiteDao(object):
         """
         raise NotImplementedError()
 
+    def delete(self, wid):
+        """
+        Deletes a website.
+        :param wid: Website's ID.
+        """
+        raise NotImplementedError()
+
 
 class LoadingDao(object):
     """
