@@ -7,6 +7,7 @@ from xanderhorkunspider.models import Website
 from xanderhorkunspider.models import Page
 from xanderhorkunspider.dao import WebsiteDao
 from xanderhorkunspider.dao import PageDao
+from xanderhorkunspider.dao import LoadingDao
 
 
 class WebsitesModel(models.Model, Website):
@@ -127,3 +128,7 @@ class PagesDBDao(PageDao):
             pageModel.delete()
         else:
             raise ValueError("Page with ID %d not found" % page)
+
+
+class LoadingDBDao(LoadingDao):
+    pass

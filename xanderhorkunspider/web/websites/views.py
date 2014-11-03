@@ -4,10 +4,9 @@ __email__ = 'mindkilleralexs@gmail.com'
 from django import shortcuts
 from django import http
 
-from xanderhorkunspider import domain
-from xanderhorkunspider import dao
 from xanderhorkunspider.web.websites import models
 from xanderhorkunspider.web.websites import forms
+from xanderhorkunspider.web.websites import domain
 
 
 def index_view(request):
@@ -16,14 +15,14 @@ def index_view(request):
     :param request: http.HttpRequest.
     :return: http.HttpResponse.
     """
-    websites_domain = domain.Websites(dao.PageDao(), models.WebsitesDBDao(), dao.LoadingDao())
+    websites_domain = domain.websites_domain
     websites = websites_domain.find_websites()
     return shortcuts.render_to_response('websites/index.html', {'websites': websites})
 
 
 def edit_website_view(request, wid=None):
-    template = 'websites/add_website.html';
-    websites = domain.Websites(dao.PageDao(), models.WebsitesDBDao(), dao.LoadingDao())
+    template = 'websites/add_website.html'
+    websites = domain.websites_domain  # domain.Websites(dao.PageDao(), models.WebsitesDBDao(), dao.LoadingDao())
     website = None
     if not wid is None:
         website = websites.find(wid)
@@ -32,8 +31,8 @@ def edit_website_view(request, wid=None):
     if request.method == 'POST':
         form = forms.WebsiteForm(request.POST)
         if form.is_valid():
-            website.host = form.cleaned_data['host'];
-            website.name = form.cleaned_data['name'];
+            website.host = form.cleaned_data['host']
+            website.name = form.cleaned_data['name']
             if not website.id:
                 websites.persist(website)
             else:
@@ -51,7 +50,7 @@ def edit_website_view(request, wid=None):
 
 def delete_website_view(request, wid=None):
     template = 'websites/delete_website.html'
-    websites = domain.Websites(dao.PageDao(), models.WebsitesDBDao(), dao.LoadingDao())
+    websites = domain.websites_domain
     website = websites.find(wid)
     if not website:
         raise http.Http404
@@ -64,7 +63,7 @@ def delete_website_view(request, wid=None):
 
 def edit_page_view(request, pid=None, wid=None):
     template = 'websites/edit_page.html'
-    websites = domain.Websites(models.PagesDBDao(), models.WebsitesDBDao(), dao.LoadingDao())
+    websites = domain.websites_domain
     website = None
     page = None
     if pid:
@@ -89,7 +88,7 @@ def edit_page_view(request, pid=None, wid=None):
 
 
 def delete_page(request, pid):
-    websites = domain.Websites(models.PagesDBDao(), models.WebsitesDBDao(), dao.LoadingDao())
+    websites = domain.websites_domain
     page = websites.find_page(pid)
     if not page:
         raise http.Http404()
