@@ -87,7 +87,7 @@ def edit_page_view(request, pid=None, wid=None):
     return shortcuts.render(request, template, {'page': page, 'form': form})
 
 
-def delete_page(request, pid):
+def delete_page_view(request, pid):
     websites = domain.websites_domain
     page = websites.find_page(pid)
     if not page:
@@ -97,3 +97,11 @@ def delete_page(request, pid):
         return shortcuts.redirect(shortcuts.resolve_url('index'))
     else:
         return shortcuts.render(request, 'websites/delete_page.html', {'page': page})
+
+
+def spider_session_view(request, wid):
+    websites = domain.websites_domain
+    website = websites.find(wid)
+    if not website:
+        raise http.Http404()
+    return shortcuts.render(request, 'websites/spider_session.html', {'website': website})

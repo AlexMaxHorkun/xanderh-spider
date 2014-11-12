@@ -5,6 +5,7 @@ from django.db import models
 
 from xanderhorkunspider.models import Website
 from xanderhorkunspider.models import Page
+from xanderhorkunspider.models import Loading
 from xanderhorkunspider.dao import WebsiteDao
 from xanderhorkunspider.dao import PageDao
 from xanderhorkunspider.dao import LoadingDao
@@ -128,6 +129,23 @@ class PagesDBDao(PageDao):
             pageModel.delete()
         else:
             raise ValueError("Page with ID %d not found" % page)
+
+
+class LoadingModel(models.Model, Loading):
+    id = models.AutoField(primary_key=True)
+    page = models.ForeignKey(PageModel, related_name='loadings_set')
+    success = models.BooleanField(default=False)
+    headers = {}
+    headers_serialized = models.CharField(max_length=512)
+    content = models.CharField(max_length=8320)
+    time = models.DateTimeField(auto_now=True)
+    loading_time = models.PositiveIntegerField()
+
+    def __str__(self):
+        return self.content
+
+    class Meta:
+        db_table = "loadings"
 
 
 class LoadingDBDao(LoadingDao):

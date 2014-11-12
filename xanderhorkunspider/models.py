@@ -64,3 +64,4 @@ class Loading(object):
     headers = {}
     content = ""
     time = None
+    loading_time = 0

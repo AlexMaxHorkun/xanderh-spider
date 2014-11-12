@@ -7,7 +7,9 @@
         <ul>
             {% for w in websites %}
                 <li>
-                    "{{ w.name }}", host - {{ w.host }} <a href="{% url 'edit_website' wid=w.id %}">Edit</a>
+                    "{{ w.name }}", host - {{ w.host }}
+                    <a href="{% url 'spider_session' wid=w.id %}">Spider session</a>
+                    <a href="{% url 'edit_website' wid=w.id %}">Edit</a>
                     <a href="{% url 'delete_website' wid=w.id %}">Delete</a>
                     <ul>
                         <li><a href="{% url 'add_page_to_website' wid=w.id %}">Add a page</a></li>

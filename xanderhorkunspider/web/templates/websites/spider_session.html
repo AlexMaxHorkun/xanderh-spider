@@ -1,0 +1,10 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <h2>Spider session for {{ website.name }}</h2>
+    <h4>Pages:</h4>
+    <ul>
+        {% for page in website.pages %}
+            <li>{{ page.url }} {% if page.isloaded %}(loaded){% endif %}</li>
+        {% endfor %}
+    </ul>
+{% endblock content %}
