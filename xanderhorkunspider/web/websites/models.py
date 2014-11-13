@@ -82,7 +82,7 @@ class WebsitesDBDao(WebsiteDao):
 
 class PageModel(models.Model, Page):
     id = models.AutoField(primary_key=True)
-    url = models.CharField(max_length=255)
+    url = models.CharField(max_length=255, unique=True)
     website = models.ForeignKey(WebsitesModel, related_name='pages_set')
 
     def __str__(self):
@@ -133,7 +133,11 @@ class PagesDBDao(PageDao):
             raise ValueError("Page with ID %d not found" % page)
 
     def find_by_url(self, url):
-        return PageModel.objects.get(url=url)
+        try:
+            page = PageModel.objects.get(url=url)
+        except PageModel.DoesNotExist:
+            page = None
+        return page
 
 
 class LoadingModel(models.Model, Loading):
@@ -164,7 +168,10 @@ class LoadingDBDao(LoadingDao):
         """
         if entity.id > 0:
             model.id = entity.id
-        model.page = entity.page
+        page = entity.page
+        if (not isinstance(page, PageModel)) and page.id > 0:
+            page = PageModel.objects.get(pk=page.id)
+        model.page = page
         model.success = entity.success
         model.headers = entity.headers
         model.headers_serialized = json.dumps(entity.headers)
