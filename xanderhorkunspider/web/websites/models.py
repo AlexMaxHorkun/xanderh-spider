@@ -1,6 +1,8 @@
 __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
+import json
+
 from django.db import models
 
 from xanderhorkunspider.models import Website
@@ -149,4 +151,49 @@ class LoadingModel(models.Model, Loading):
 
 
 class LoadingDBDao(LoadingDao):
-    pass
+    @classmethod
+    def _entity_to_model(cls, entity, model):
+        """
+        Copy attributes from entity to django's model.
+
+        :param entity: Loading entity.
+        :param model: LoadingModel instance.
+        """
+        if entity.id > 0:
+            model.id = entity.id
+        model.page = entity.page
+        model.success = entity.success
+        model.headers = entity.headers
+        model.headers_serialized = json.dumps(entity.headers)
+        model.content = entity.content
+        model.time = entity.time
+        model.loading_time = entity.loading_time
+
+    def persist(self, loading):
+        if isinstance(loading, Loading):
+            loadingModel = LoadingModel()
+            LoadingDBDao._entity_to_model(loading, loadingModel)
+            loadingModel.save()
+            loading.id = loadingModel.id
+        elif isinstance(loading, LoadingModel):
+            loading.save()
+        else:
+            raise ValueError()
+
+    def save(self, loading):
+        if isinstance(loading, Loading):
+            loadingModel = LoadingModel()
+            LoadingDBDao._entity_to_model(loading, loadingModel)
+            loadingModel.save()
+        elif isinstance(loading, LoadingModel):
+            loading.save()
+        else:
+            raise ValueError()
+
+    def find_all(self, limit=0, offset=0):
+        query = LoadingModel.objects.all()
+        if limit > 0:
+            query = query[:limit]
+        if offset > 0:
+            query = query[offset:]
+        return query

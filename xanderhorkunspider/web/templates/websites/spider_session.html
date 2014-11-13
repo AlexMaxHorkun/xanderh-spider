@@ -1,10 +1,33 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <h2>Spider session for {{ website.name }}</h2>
-    <h4>Pages:</h4>
-    <ul>
-        {% for page in website.pages %}
-            <li>{{ page.url }} {% if page.isloaded %}(loaded){% endif %}</li>
-        {% endfor %}
-    </ul>
+    <table>
+        <tr>
+            <td>
+                <h2>Spider session for {{ website.name }}</h2>
+                <h4>Pages:</h4>
+                <ul>
+                    {% for page in website.pages %}
+                        <li>{{ page.url }} {% if page.isloaded %}(loaded){% endif %}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+
+            <td>
+                {% if not spider_manager %}
+                <h2>Set options for spider</h2>
+                    <div id="spider-options">
+                        <div id="max_processes">
+                            <label>
+                                Max amount of processes:
+                                <input type="number">
+                            </label>
+                        </div>
+                    </div>
+                    <button type="button" id="start-button">Start</button>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+    {% load staticfiles %}
+    <script src="{% static 'spider_session.js' %}"></script>
 {% endblock content %}

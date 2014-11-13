@@ -3,6 +3,7 @@ __email__ = 'mindkilleralexs@gmail.com'
 
 import threading
 import time
+import datetime
 
 from xanderhorkunspider import loader
 from xanderhorkunspider import parser
@@ -49,9 +50,15 @@ class Spider(object):
         if self.use_existing and page.isloaded():
             loading = page.get_last_successful_loading()
         else:
+            start_time = datetime.datetime.utcnow()
             load_result = self.page_loader.load(page.url)
-            loading = models.Loading(page, not load_result is None, getattr(load_result, "headers", {}),
-                                     getattr(load_result, "body", ""))
+            loading = models.Loading()
+            loading.page = page
+            loading.success = not load_result is None
+            loading.headers = getattr(load_result, "headers", {})
+            loading.content = getattr(load_result, "body", "")
+            loading.time = start_time
+            loading.loading_time = (datetime.datetime.utcnow() - start_time).total_seconds()
         if len(loading.content):
             links = self.links_parser.parse(loading)
         else:
