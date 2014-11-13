@@ -42,20 +42,20 @@ class WebsitesDBDao(WebsiteDao):
         if isinstance(website, WebsitesModel):
             website.save()
         else:
-            websiteModel = WebsitesModel()
-            WebsitesDBDao._entity_to_model(website, websiteModel)
-            websiteModel.save()
-            website.id = websiteModel.id
+            website_model = WebsitesModel()
+            WebsitesDBDao._entity_to_model(website, website_model)
+            website_model.save()
+            website.id = website_model.id
 
     def save(self, website):
         if isinstance(website, WebsitesModel):
             website.save()
         else:
-            websiteModel = WebsitesModel.objects.get(pk=website.id)
-            if not websiteModel:
+            website_model = WebsitesModel.objects.get(pk=website.id)
+            if not website_model:
                 raise RuntimeError()
-            WebsitesDBDao._entity_to_model(website, websiteModel)
-            websiteModel.save()
+            WebsitesDBDao._entity_to_model(website, website_model)
+            website_model.save()
 
     def find(self, wid):
         return WebsitesModel.objects.get(pk=wid)
@@ -110,27 +110,30 @@ class PagesDBDao(PageDao):
 
     def persist(self, page):
         if not isinstance(page, PageModel):
-            pageModel = PageModel()
-            PagesDBDao._entity_to_model(page, pageModel)
-            pageModel.save()
-            page.id = pageModel.id
+            page_model = PageModel()
+            PagesDBDao._entity_to_model(page, page_model)
+            page_model.save()
+            page.id = page_model.id
         else:
             page.save()
 
     def save(self, page):
         if not isinstance(page, PageModel):
-            pageModel = PageModel()
-            PagesDBDao._entity_to_model(page, pageModel)
-            pageModel.save()
+            page_model = PageModel()
+            PagesDBDao._entity_to_model(page, page_model)
+            page_model.save()
         else:
             page.save()
 
     def delete(self, page):
-        pageModel = PageModel.objects.get(pk=page)
-        if pageModel:
-            pageModel.delete()
+        page_model = PageModel.objects.get(pk=page)
+        if page_model:
+            page_model.delete()
         else:
             raise ValueError("Page with ID %d not found" % page)
+
+    def find_by_url(self, url):
+        return PageModel.objects.get(url=url)
 
 
 class LoadingModel(models.Model, Loading):
@@ -138,8 +141,8 @@ class LoadingModel(models.Model, Loading):
     page = models.ForeignKey(PageModel, related_name='loadings_set')
     success = models.BooleanField(default=False)
     headers = {}
-    headers_serialized = models.CharField(max_length=512)
-    content = models.CharField(max_length=8320)
+    headers_serialized = models.CharField(max_length=2048)
+    content = models.CharField(max_length=256000)
     time = models.DateTimeField(auto_now=True)
     loading_time = models.PositiveIntegerField()
 
@@ -171,10 +174,10 @@ class LoadingDBDao(LoadingDao):
 
     def persist(self, loading):
         if isinstance(loading, Loading):
-            loadingModel = LoadingModel()
-            LoadingDBDao._entity_to_model(loading, loadingModel)
-            loadingModel.save()
-            loading.id = loadingModel.id
+            loading_model = LoadingModel()
+            LoadingDBDao._entity_to_model(loading, loading_model)
+            loading_model.save()
+            loading.id = loading_model.id
         elif isinstance(loading, LoadingModel):
             loading.save()
         else:
@@ -182,9 +185,9 @@ class LoadingDBDao(LoadingDao):
 
     def save(self, loading):
         if isinstance(loading, Loading):
-            loadingModel = LoadingModel()
-            LoadingDBDao._entity_to_model(loading, loadingModel)
-            loadingModel.save()
+            loading_model = LoadingModel()
+            LoadingDBDao._entity_to_model(loading, loading_model)
+            loading_model.save()
         elif isinstance(loading, LoadingModel):
             loading.save()
         else:

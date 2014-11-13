@@ -55,7 +55,7 @@ class Spider(object):
             loading = models.Loading()
             loading.page = page
             loading.success = not load_result is None
-            loading.headers = getattr(load_result, "headers", {})
+            loading.headers = dict(getattr(load_result, "headers", {}))
             loading.content = getattr(load_result, "body", "")
             loading.time = start_time
             loading.loading_time = (datetime.datetime.utcnow() - start_time).total_seconds()
@@ -110,7 +110,7 @@ class SpiderManager(threading.Thread):
     update_existing = False
     stop_when_done = False
 
-    def __init__(self, websites, spider=None, max_p=None, loading_evaluator=None):
+    def __init__(self, websites, spider=None, max_p=None, loading_evaluator=None, autostart=False):
         """
         :param websites: Websites domain.
         :param spider: Custom Spider impl if needed.
@@ -126,7 +126,8 @@ class SpiderManager(threading.Thread):
         self.websites = websites
         if not loading_evaluator is None:
             self.evaluator = loading_evaluator
-        self.start()
+        if autostart:
+            self.start()
 
     def running_count(self):
         """

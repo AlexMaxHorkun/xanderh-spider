@@ -15,5 +15,6 @@ urlpatterns = patterns('',
                        url(r'^website/(?P<wid>\d+)/add-page', views.edit_page_view, name='add_page_to_website'),
                        url(r'^edit-page/(?P<pid>\d+)', views.edit_page_view, name='edit_page'),
                        url(r'^delete_page/(\d+)$', views.delete_page_view, name='delete_page'),
-                       url(r'^spider_session/webiste-(?P<wid>\d+)$', views.spider_session_view, name='spider_session')
+                       url(r'^spider_session/webiste-(?P<wid>\d+)$', views.spider_session_view, name='spider_session'),
+                       url(r'^spider_session$', views.start_spider_session_view, name='start_spider_session'),
 )

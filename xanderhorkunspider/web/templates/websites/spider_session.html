@@ -14,7 +14,7 @@
 
             <td>
                 {% if not spider_manager %}
-                <h2>Set options for spider</h2>
+                    <h2>Set options for spider</h2>
                     <div id="spider-options">
                         <div id="max_processes">
                             <label>
@@ -23,7 +23,7 @@
                             </label>
                         </div>
                     </div>
-                    <button type="button" id="start-button">Start</button>
+                    <button type="button" id="start-button" website-id="{{ website.id }}">Start</button>
                 {% endif %}
             </td>
         </tr>

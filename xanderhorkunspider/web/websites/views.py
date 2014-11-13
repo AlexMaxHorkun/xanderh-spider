@@ -39,12 +39,12 @@ def edit_website_view(request, wid=None):
                 websites.save(website)
             return shortcuts.redirect(shortcuts.resolve_url('index'))
     else:
-        formData = None
+        form_data = None
         if website.id:
-            formData = {}
-            formData['name'] = website.name
-            formData['host'] = website.host
-        form = forms.WebsiteForm(formData)
+            form_data = dict()
+            form_data['name'] = website.name
+            form_data['host'] = website.host
+        form = forms.WebsiteForm(form_data)
     return shortcuts.render(request, template, {'form': form, 'website': website})
 
 
@@ -64,8 +64,6 @@ def delete_website_view(request, wid=None):
 def edit_page_view(request, pid=None, wid=None):
     template = 'websites/edit_page.html'
     websites = domain.websites_domain
-    website = None
-    page = None
     if pid:
         page = websites.find_page(pid)
         if not page:
@@ -105,3 +103,18 @@ def spider_session_view(request, wid):
     if not website:
         raise http.Http404()
     return shortcuts.render(request, 'websites/spider_session.html', {'website': website})
+
+
+def start_spider_session_view(request):
+    wid = request.GET.get('website')
+    max_processes = int(request.GET.get('max_processes'))
+    if not wid:
+        raise http.Http404()
+    if max_processes:
+        domain.spider_manager.max_process_count = max_processes
+    website = domain.websites_domain.find(wid)
+    if (not website) or (not len(website.pages)):
+        raise http.Http404()
+    for p in website.pages:
+        domain.spider_manager.crawl(p)
+    return http.HttpResponse('', content_type="text/plain")
