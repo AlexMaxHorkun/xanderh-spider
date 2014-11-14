@@ -1,6 +1,8 @@
 __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
+import json
+
 from django import shortcuts
 from django import http
 
@@ -128,12 +130,19 @@ def spider_status_view(request):
     Gets information about spider and it's processes. Returns json.
     """
     running_pages = domain.spider_manager.get_active_pages()
+    waiting_pages = domain.spider_manager.get_waiting_pages()
     finished_pages = list()
     for crawling_result in domain.spider_manager.crawling_results:
         finished_pages.append(crawling_result.page)
-    response_data = {'is_alive': domain.spider_manager.is_alive(), 'running': list(), 'finished': list()}
+    response_data = {'is_alive': domain.spider_manager.is_alive(), 'running': list(), 'finished': list(),
+                     'waiting': list()}
     for p in running_pages:
         response_data['running'].append({
+            'url': p.url,
+            'website': {'name': p.website.name}
+        })
+    for p in waiting_pages:
+        response_data['waiting'].append({
             'url': p.url,
             'website': {'name': p.website.name}
         })
@@ -142,4 +151,4 @@ def spider_status_view(request):
             'url': p.url,
             'website': {'name': p.website.name}
         })
-    return http.HttpResponse(response_data, mimetype="application/json")
+    return http.HttpResponse(json.dumps(response_data), mimetype="application/json")

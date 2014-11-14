@@ -9,11 +9,120 @@
     </div>
 </div>
 <script>
-    function SpiderStatus(url) {
+    function Loading(url, started, finished) {
+        this.url = url;
+        this.started = started;
+        this.finished = finished;
+    }
+
+
+    function SpiderStatus(url, renderer) {
         this.receiveStatusUrl = url;
         this.loadings = [];
         this.isRunnig = false;
+        this.renderer = renderer;
     }
 
-    var spiderStatus = new SpiderStatus("{% url 'spider_status' %}");
+    SpiderStatus.prototype.findLoadingByUrl = function (url) {
+        for (var i = 0; i < this.loadings.length; i++) {
+            if (this.loadings[i].url == url) {
+                return this.loadings[i];
+            }
+        }
+    };
+
+    SpiderStatus.prototype.update = function () {
+        $.ajax(this.url, {
+            type: "GET",
+            dataType: "json",
+            success: function (data, status, xhr) {
+                this.isRunnig = data.is_alive;
+                for (var i = 0; i < data.waiting.length; i++) {
+                    var loadingData = data.waiting[i];
+                    var loading;
+                    if (loading = this.findLoadingByUrl(loadingData.url)) {
+                        loading.started = false;
+                        loading.finished = false;
+                    }
+                    else {
+                        this.loadings.push(new Loading(loadingData.url, false, false));
+                    }
+                }
+                for (var i = 0; i < data.running.length; i++) {
+                    var loadingData = data.running[i];
+                    var loading;
+                    if (loading = this.findLoadingByUrl(loadingData.url)) {
+                        loading.started = true;
+                        loading.finished = false;
+                    }
+                    else {
+                        this.loadings.push(new Loading(loadingData.url, true, false));
+                    }
+                }
+                for (var i = 0; i < data['finished'].length; i++) {
+                    var loadingData = data['finished'][i];
+                    var loading;
+                    if (loading = this.findLoadingByUrl(loadingData.url)) {
+                        loading.started = true;
+                        loading.finished = true;
+                    }
+                    else {
+                        this.loadings.push(new Loading(loadingData.url, true, true));
+                    }
+                }
+                this.renderer.render(this.loadings);
+            },
+            error: function () {
+                console.log("Error occurred during spider's status update");
+            }
+        });
+    };
+
+
+    function SpiderStatusRenderer() {
+        this.maxLoadingNameLength = 40;
+    }
+    SpiderStatusRenderer.prototype.render = function (loadings) {
+        var fetchStatus = function (started, finished) {
+            var statusText;
+            if (started && !finished) {
+                statusText = "Running";
+            }
+            if (!started) {
+                statusText = "Waiting";
+            }
+            if (started && finished) {
+                statusText = "Finished";
+            }
+            return statusText;
+        };
+        var $loadings = $("#spider-status #loadings");
+        for (var i = 0; i < this.loadings.length; i++) {
+            var loading = this.spider.loadings[i];
+            var $item = $loadings.find("li[page-url='" + loading.url + "']");
+            if ($item) {
+                if ($item.attr("started") != loading.started || $item.attr("finished") != loading.finished) {
+                    $item.attr("started", loading.started);
+                    $item.attr("finished", loading.finished);
+                    $item.find("#text-status").text(fetchStatus(loading.started, loading.finished));
+                }
+            }
+            else {
+                var loadingName = "";
+                if (loading.url.length > this.maxLoadingNameLength) {
+                    loadingName = loading.url.substr(0, this.maxLoadingNameLength) + "...";
+                }
+                else {
+                    loadingName = loading.url;
+                }
+                $loadings.append('<li started="' + loading.started + '" finished="' + loading.finished
+                        + '" page-url="' + loading.url + '">' + loadingName
+                        + ' <span id="text-status">' + fetchStatus(loading.started, loading.finished) + '</span></li>');
+            }
+        }
+    };
+
+    var spiderStatus = new SpiderStatus("{% url 'spider_status' %}", new SpiderStatusRenderer());
+    spiderStatus.update();
+    var updateInterval = setInterval(spiderStatus.update, 1000);
 </script>

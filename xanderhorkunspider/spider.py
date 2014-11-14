@@ -224,3 +224,14 @@ class SpiderManager(threading.Thread):
             if p.is_alive():
                 pages.append(p.page)
         return pages
+
+    def get_waiting_pages(self):
+        """
+        Gets list of pages which are waiting to be processed.
+        :return: List of pages.
+        """
+        pages = list()
+        for p in self.__processes:
+            if not p.is_alive() and not p.finished:
+                pages.append(p.page)
+        return pages
