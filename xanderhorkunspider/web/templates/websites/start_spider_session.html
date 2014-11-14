@@ -1,0 +1,19 @@
+<div id="spider-status">
+    <h2 id="spider-stance">
+        <span id="running" {% if not spider.is_alive %}style="display: none"{% endif %}>Spider is running</span>
+        <span id="stopped" {% if spider.is_alive %}style="display: none"{% endif %}>Spider is stoped</span>
+    </h2>
+
+    <div>
+        <ul id="loadings"></ul>
+    </div>
+</div>
+<script>
+    function SpiderStatus(url) {
+        this.receiveStatusUrl = url;
+        this.loadings = [];
+        this.isRunnig = false;
+    }
+
+    var spiderStatus = new SpiderStatus("{% url 'spider_status' %}");
+</script>

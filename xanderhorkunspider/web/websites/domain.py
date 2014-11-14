@@ -10,4 +10,4 @@ __pages_dao = __models.PagesDBDao()
 __loading_dao = __models.LoadingDBDao()
 websites_domain = __domain.Websites(__pages_dao, __websites_dao, __loading_dao)
 
-spider_manager = __spider.SpiderManager(websites_domain, max_p=50, autostart=True)
+spider_manager = __spider.SpiderManager(websites_domain, max_p=50, autostart=False)

@@ -66,6 +66,21 @@ class Spider(object):
         return loading, links
 
 
+class CrawlingResult(object):
+    __slots__ = ['loading', 'page', 'links']
+
+    def __init__(self, loading, page, links):
+        """
+        Class holds info about CrawlingProcess.
+        :param loading: Loading that has been created during crawling process.
+        :param page: Page entity that was loaded.
+        :param links: Set of links received from page content.
+        """
+        self.loading = loading
+        self.page = page
+        self.links = links
+
+
 class CrawlingProcess(threading.Thread):
     page = None
     resulting_loading = None
@@ -109,6 +124,7 @@ class SpiderManager(threading.Thread):
     evaluator = LoadingEvaluator()
     update_existing = False
     stop_when_done = False
+    crawling_results = list()
 
     def __init__(self, websites, spider=None, max_p=None, loading_evaluator=None, autostart=False):
         """
@@ -192,7 +208,19 @@ class SpiderManager(threading.Thread):
                         self._start_process(p)
                     else:
                         self._process_crawling_result(p)
+                        self.crawling_results.append(CrawlingResult(p.resulting_loading, p.page, p.resulting_links))
                         self.__processes.remove(p)
                 if self.stop_when_done and self.is_done():
                     break
             time.sleep(1)
+
+    def get_active_pages(self):
+        """
+        Gets list of pages which are now being processed.
+        :return: List of pages.
+        """
+        pages = list()
+        for p in self.__processes:
+            if p.is_alive():
+                pages.append(p.page)
+        return pages

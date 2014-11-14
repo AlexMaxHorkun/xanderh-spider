@@ -37,7 +37,15 @@ class Websites(object):
         if not loading.page:
             raise ValueError("Loading must have link to page")
         if loading.page.id == 0:
-            self._page_dao.persist(loading.page)
+            try:
+                self._page_dao.persist(loading.page)
+            except:
+                # Maybe page with such URL already exists
+                page = self._page_dao.find_by_url(loading.page.url)
+                if page:
+                    loading.page = page
+                else:
+                    raise RuntimeError(message="Failed to persist page with url '%s'" % loading.page.url)
         if loading.id == 0:
             self._loading_dao.persist(loading)
         else:
@@ -70,7 +78,6 @@ class Websites(object):
         Deletes a website.
         :param website: Website entity or ID.
         """
-        wid = 0
         if isinstance(website, models.Website):
             wid = website.id
         else:

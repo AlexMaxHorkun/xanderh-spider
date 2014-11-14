@@ -117,4 +117,29 @@ def start_spider_session_view(request):
         raise http.Http404()
     for p in website.pages:
         domain.spider_manager.crawl(p)
-    return http.HttpResponse('', content_type="text/plain")
+    if not domain.spider_manager.is_alive():
+        domain.spider_manager.start()
+    return shortcuts.render(request, "websites/start_spider_session.html",
+                            {'spider': domain.spider_manager, 'website': website})
+
+
+def spider_status_view(request):
+    """
+    Gets information about spider and it's processes. Returns json.
+    """
+    running_pages = domain.spider_manager.get_active_pages()
+    finished_pages = list()
+    for crawling_result in domain.spider_manager.crawling_results:
+        finished_pages.append(crawling_result.page)
+    response_data = {'is_alive': domain.spider_manager.is_alive(), 'running': list(), 'finished': list()}
+    for p in running_pages:
+        response_data['running'].append({
+            'url': p.url,
+            'website': {'name': p.website.name}
+        })
+    for p in finished_pages:
+        response_data['finished'].append({
+            'url': p.url,
+            'website': {'name': p.website.name}
+        })
+    return http.HttpResponse(response_data, mimetype="application/json")
