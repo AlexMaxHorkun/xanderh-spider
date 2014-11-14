@@ -1,0 +1,14 @@
+body {
+    width: 100%;
+    max-width: 100%;
+}
+
+#spider-session {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+#spider-session td {
+    max-width: 50%;
+    overflow: hidden;
+}

@@ -1,8 +1,8 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <table>
+    <table id="spider-session">
         <tr>
-            <td>
+            <td valign="top">
                 <h2>Spider session for {{ website.name }}</h2>
                 <h4>Pages:</h4>
                 <ul>
@@ -12,7 +12,7 @@
                 </ul>
             </td>
 
-            <td>
+            <td id="spider-info" valign="top">
                 {% if not spider_manager %}
                     <h2>Set options for spider</h2>
                     <div id="spider-options">
