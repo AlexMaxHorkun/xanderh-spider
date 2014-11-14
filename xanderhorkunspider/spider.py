@@ -66,29 +66,43 @@ class Spider(object):
         return loading, links
 
 
-class CrawlingResult(object):
-    __slots__ = ['loading', 'page', 'links']
+class CrawlingInfo(object):
+    __slots__ = ['loading', 'page', 'links', 'started', 'finished']
 
-    def __init__(self, loading, page, links):
+    def __init__(self, loading, page, links, started, finished):
         """
         Class holds info about CrawlingProcess.
         :param loading: Loading that has been created during crawling process.
         :param page: Page entity that was loaded.
         :param links: Set of links received from page content.
+        :param started: When started (datetime).
+        :param finished: When finished (datetime).
         """
         self.loading = loading
         self.page = page
         self.links = links
+        self.started = started
+        self.finished = finished
+
+    def time_took(self):
+        """
+        Calculates what time did it take to finish crawling process.
+        :return: int, seconds.
+        """
+        if not (self.finished and self.started):
+            return 0
+        return (self.finished - self.started).total_seconds()
 
 
 class CrawlingProcess(threading.Thread):
     page = None
     resulting_loading = None
     resulting_links = None
-    finished = False
+    finished = None
     spider = None
     websites = None
     evaluator = None
+    started = None
 
     def __init__(self, page, spider, websites, ev):
         """
@@ -107,13 +121,14 @@ class CrawlingProcess(threading.Thread):
         """
         Runs spider's crawl and saves results.
         """
+        self.started = datetime.datetime.utcnow()
         loading, links = self.spider.crawl_on_page(self.page)
         self.resulting_links = links
         self.resulting_loading = loading
         if (loading.id == 0 and loading.page, id == 0 and self.evaluator.evaluate_loading(loading)) \
                 or not loading.page.id == 0:
             self.websites.save_loading(loading)
-        self.finished = True
+        self.finished = datetime.datetime.utcnow()
 
 
 class SpiderManager(threading.Thread):
@@ -124,7 +139,7 @@ class SpiderManager(threading.Thread):
     evaluator = LoadingEvaluator()
     update_existing = False
     stop_when_done = False
-    crawling_results = list()
+    finished_processes = list()
 
     def __init__(self, websites, spider=None, max_p=None, loading_evaluator=None, autostart=False):
         """
@@ -208,30 +223,42 @@ class SpiderManager(threading.Thread):
                         self._start_process(p)
                     else:
                         self._process_crawling_result(p)
-                        self.crawling_results.append(CrawlingResult(p.resulting_loading, p.page, p.resulting_links))
+                        self.finished_processes.append(
+                            CrawlingInfo(p.resulting_loading, p.page, p.resulting_links, p.started, p.finished))
                         self.__processes.remove(p)
                 if self.stop_when_done and self.is_done():
                     break
             time.sleep(1)
 
-    def get_active_pages(self):
+    def active_processes_info(self):
         """
-        Gets list of pages which are now being processed.
-        :return: List of pages.
+        Gets info about running processes.
+        :return: List of CrawlingInfo.
         """
-        pages = list()
+        info = list()
         for p in self.__processes:
             if p.is_alive():
-                pages.append(p.page)
-        return pages
+                info.append(CrawlingInfo(None, p.page, None, p.started, None))
+        return info
 
-    def get_waiting_pages(self):
+    def waiting_processes_info(self):
         """
-        Gets list of pages which are waiting to be processed.
-        :return: List of pages.
+        Gets info about waiting processes.
+        :return: List of CrawlingInfo.
         """
-        pages = list()
+        info = list()
         for p in self.__processes:
             if not p.is_alive() and not p.finished:
-                pages.append(p.page)
-        return pages
+                info.append(CrawlingInfo(None, p.page, None, None, None))
+        return info
+
+    def crawling_info(self):
+        """
+        Gets info about  processes.
+        :return: List of CrawlingInfo.
+        """
+        info = list()
+        for p in self.__processes:
+            info.append(CrawlingInfo(p.resulting_loading, p.page, p.resulting_links, p.started, p.finished))
+        info += self.finished_processes
+        return info

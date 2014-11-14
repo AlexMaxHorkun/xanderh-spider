@@ -11,4 +11,6 @@ body {
 #spider-session td {
     max-width: 50%;
     overflow: hidden;
+    border-right: 1px solid gray;
+    padding: 5px 10px;
 }

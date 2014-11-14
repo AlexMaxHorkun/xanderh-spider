@@ -3,13 +3,8 @@
     <table id="spider-session">
         <tr>
             <td valign="top">
-                <h2>Spider session for {{ website.name }}</h2>
-                <h4>Pages:</h4>
-                <ul>
-                    {% for page in website.pages %}
-                        <li>{{ page.url }} {% if page.isloaded %}(loaded){% endif %}</li>
-                    {% endfor %}
-                </ul>
+                <h2>Spider session for "{{ website.name }}"</h2>
+                <h4>Pages count: {{ website.pages_count }}</h4>
             </td>
 
             <td id="spider-info" valign="top">

@@ -28,6 +28,13 @@ class WebsitesModel(models.Model, Website):
     def pages(self):
         return self.pages_set.all()
 
+    def pages_count(self):
+        """
+        Number of pages belongs.
+        :return: int
+        """
+        return self.pages_set.count()
+
 
 class WebsitesDBDao(WebsiteDao):
     def find_all(self, offset=0, limit=0):

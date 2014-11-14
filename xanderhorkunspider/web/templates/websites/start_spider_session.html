@@ -9,10 +9,11 @@
     </div>
 </div>
 <script>
-    function Loading(url, started, finished) {
+    function Loading(id, url, started, finished) {
         this.url = url;
         this.started = started;
         this.finished = finished;
+        this.id = id;
     }
 
 
@@ -38,37 +39,34 @@
         var self = this;
         $.get(this.receiveStatusUrl, {}, function (data) {
             self.isRunnig = data.is_alive;
-            for (var i = 0; i < data.waiting.length; i++) {
-                var loadingData = data.waiting[i];
+            for (var i = 0; i < data.loadings.length; i++) {
+                var loadingData = data.loadings[i];
+                var started;
+                if (loadingData.started) {
+                    var startedData = loadingData.started.split(',');
+                    started = new Date(startedData[0], startedData[1], startedData[2], startedData[3], startedData[4], startedData[5], startedData[6], 0);
+                }
+                var finished;
+                if (loadingData.finished) {
+                    var finishedData = loadingData.finished.split(',');
+                    finished = new Date(startedData[0], startedData[1], startedData[2], startedData[3], startedData[4], startedData[5], startedData[6], 0);
+                }
                 var loading;
-                if (loading = self.findLoadingById(loadingData.url)) {
-                    loading.started = false;
-                    loading.finished = false;
+                if (loading = self.findLoadingById(loadingData.id)) {
+                    loading.started = started;
+                    loading.finished = finished;
                 }
                 else {
-                    self.loadings.push(new Loading(loadingData.url, false, false));
+                    loading = new Loading(loadingData.id, loadingData.url, started, finished);
+                    self.loadings.push(loading);
                 }
             }
-            for (i = 0; i < data.running.length; i++) {
-                loadingData = data.running[i];
-                if (loading = self.findLoadingById(loadingData.url)) {
-                    loading.started = true;
-                    loading.finished = false;
+            self.loadings.sort(function (a, b) {
+                if (a.started == b.started) {
+                    return 0;
                 }
-                else {
-                    self.loadings.push(new Loading(loadingData.url, true, false));
-                }
-            }
-            for (i = 0; i < data['finished'].length; i++) {
-                loadingData = data['finished'][i];
-                if (loading = self.findLoadingById(loadingData.url)) {
-                    loading.started = true;
-                    loading.finished = true;
-                }
-                else {
-                    self.loadings.push(new Loading(loadingData.url, true, true));
-                }
-            }
+                return (a.started < b.started) ? 1 : -1;
+            });
             self.renderer.render(self.loadings, self.isRunnig);
             setTimeout(function () {
                 self.isUpdating = false;
@@ -79,6 +77,7 @@
 
     function SpiderStatusRenderer() {
         this.maxLoadingNameLength = 40;
+        this.maxItemsShow = 100;
     }
     SpiderStatusRenderer.prototype.render = function (loadings, isAlive) {
         if (isAlive) {
@@ -89,6 +88,7 @@
             $("#spider-status #spider-stance #running").hide();
             $("#spider-status #spider-stance #stopped").show();
         }
+        $("#spider-status #loadings li[finished='true'], #spider-status #loadings li[finished='1']").remove();
         var fetchStatus = function (started, finished) {
             var statusText;
             if (started && !finished) {
@@ -108,11 +108,7 @@
             var $item = $loadings.find("li[page-id='" + loading.id + "']").get(0);
             if ($item) {
                 $item = $($item);
-                if ($item.attr("started") != loading.started || $item.attr("finished") != loading.finished) {
-                    $item.attr("started", loading.started);
-                    $item.attr("finished", loading.finished);
-                    $item.find("#text-status").text(fetchStatus(loading.started, loading.finished));
-                }
+                $item.find("#text-status").text(fetchStatus(loading.started, loading.finished));
             }
             else {
                 var loadingName = "";
@@ -122,8 +118,7 @@
                 else {
                     loadingName = loading.url;
                 }
-                $loadings.append('<li started="' + loading.started + '" finished="' + loading.finished
-                        + '" page-id="' + loading.id + '">' + loadingName
+                $loadings.append('<li page-id="' + loading.id + '">' + loadingName
                         + ' <span id="text-status">' + fetchStatus(loading.started, loading.finished) + '</span></li>');
             }
         }

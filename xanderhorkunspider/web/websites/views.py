@@ -130,29 +130,20 @@ def spider_status_view(request):
     """
     Gets information about spider and it's processes. Returns json.
     """
-    running_pages = domain.spider_manager.get_active_pages()
-    waiting_pages = domain.spider_manager.get_waiting_pages()
-    finished_pages = list()
-    for crawling_result in domain.spider_manager.crawling_results:
-        finished_pages.append(crawling_result.page)
-    response_data = {'is_alive': domain.spider_manager.is_alive(), 'running': list(), 'finished': list(),
-                     'waiting': list()}
-    for p in running_pages:
-        response_data['running'].append({
-            'url': p.url,
-            'website': {'name': p.website.name},
-            'id': str(base64.urlsafe_b64encode(str.encode(p.url)))
-        })
-    for p in waiting_pages:
-        response_data['waiting'].append({
-            'url': p.url,
-            'website': {'name': p.website.name},
-            'id': str(base64.urlsafe_b64encode(str.encode(p.url)))
-        })
-    for p in finished_pages:
-        response_data['finished'].append({
-            'url': p.url,
-            'website': {'name': p.website.name},
-            'id': str(base64.urlsafe_b64encode(str.encode(p.url)))
-        })
+    info = domain.spider_manager.crawling_info()
+    response_data = {'is_alive': domain.spider_manager.is_alive(), 'loadings': list()}
+    for crawling in info:
+        crawling_data = {
+            'url': crawling.page.url,
+            'website': {'name': crawling.page.website.name},
+            'id': base64.urlsafe_b64encode(str.encode(crawling.page.url)).decode(),
+            'started': 0,
+            'finished': 0,
+        }
+        if crawling.started:
+            crawling_data['started'] = crawling.started.strftime("%y,%m,%d,%H,%M,%S")
+        if crawling.finished:
+            crawling_data['finished'] = crawling.finished.strftime("%y,%m,%d,%H,%M,%S")
+        response_data['loadings'].append(crawling_data)
+
     return http.HttpResponse(json.dumps(response_data), content_type="application/json")
