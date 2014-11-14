@@ -2,6 +2,7 @@ __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
 import json
+import base64
 
 from django import shortcuts
 from django import http
@@ -139,16 +140,19 @@ def spider_status_view(request):
     for p in running_pages:
         response_data['running'].append({
             'url': p.url,
-            'website': {'name': p.website.name}
+            'website': {'name': p.website.name},
+            'id': str(base64.urlsafe_b64encode(str.encode(p.url)))
         })
     for p in waiting_pages:
         response_data['waiting'].append({
             'url': p.url,
-            'website': {'name': p.website.name}
+            'website': {'name': p.website.name},
+            'id': str(base64.urlsafe_b64encode(str.encode(p.url)))
         })
     for p in finished_pages:
         response_data['finished'].append({
             'url': p.url,
-            'website': {'name': p.website.name}
+            'website': {'name': p.website.name},
+            'id': str(base64.urlsafe_b64encode(str.encode(p.url)))
         })
     return http.HttpResponse(json.dumps(response_data), content_type="application/json")

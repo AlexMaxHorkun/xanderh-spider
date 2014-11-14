@@ -24,9 +24,9 @@
         this.isUpdating = false;
     }
 
-    SpiderStatus.prototype.findLoadingByUrl = function (url) {
+    SpiderStatus.prototype.findLoadingById = function (id) {
         for (var i = 0; i < this.loadings.length; i++) {
-            if (this.loadings[i].url == url) {
+            if (this.loadings[i].id == id) {
                 return this.loadings[i];
             }
         }
@@ -41,7 +41,7 @@
             for (var i = 0; i < data.waiting.length; i++) {
                 var loadingData = data.waiting[i];
                 var loading;
-                if (loading = self.findLoadingByUrl(loadingData.url)) {
+                if (loading = self.findLoadingById(loadingData.url)) {
                     loading.started = false;
                     loading.finished = false;
                 }
@@ -51,7 +51,7 @@
             }
             for (i = 0; i < data.running.length; i++) {
                 loadingData = data.running[i];
-                if (loading = self.findLoadingByUrl(loadingData.url)) {
+                if (loading = self.findLoadingById(loadingData.url)) {
                     loading.started = true;
                     loading.finished = false;
                 }
@@ -61,7 +61,7 @@
             }
             for (i = 0; i < data['finished'].length; i++) {
                 loadingData = data['finished'][i];
-                if (loading = self.findLoadingByUrl(loadingData.url)) {
+                if (loading = self.findLoadingById(loadingData.url)) {
                     loading.started = true;
                     loading.finished = true;
                 }
@@ -105,8 +105,9 @@
         var $loadings = $("#spider-status #loadings");
         for (var i = 0; i < loadings.length; i++) {
             var loading = loadings[i];
-            var $item = $loadings.find("li[page-url='" + loading.url + "']");
+            var $item = $loadings.find("li[page-id='" + loading.id + "']").get(0);
             if ($item) {
+                $item = $($item);
                 if ($item.attr("started") != loading.started || $item.attr("finished") != loading.finished) {
                     $item.attr("started", loading.started);
                     $item.attr("finished", loading.finished);
@@ -122,7 +123,7 @@
                     loadingName = loading.url;
                 }
                 $loadings.append('<li started="' + loading.started + '" finished="' + loading.finished
-                        + '" page-url="' + loading.url + '">' + loadingName
+                        + '" page-id="' + loading.id + '">' + loadingName
                         + ' <span id="text-status">' + fetchStatus(loading.started, loading.finished) + '</span></li>');
             }
         }
@@ -131,6 +132,8 @@
     var spiderStatus = new SpiderStatus("{% url 'spider_status' %}", new SpiderStatusRenderer());
     spiderStatus.update();
     var updateInterval = setInterval(function (spiderStatus) {
-        spiderStatus.update();
+        return function () {
+            spiderStatus.update();
+        };
     }(spiderStatus), 1000);
 </script>
