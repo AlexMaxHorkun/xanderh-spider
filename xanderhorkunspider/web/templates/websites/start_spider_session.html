@@ -37,7 +37,7 @@
         this.isUpdating = true;
         var self = this;
         $.get(this.receiveStatusUrl, {}, function (data) {
-            this.isRunnig = data.is_alive;
+            self.isRunnig = data.is_alive;
             for (var i = 0; i < data.waiting.length; i++) {
                 var loadingData = data.waiting[i];
                 var loading;
@@ -49,9 +49,8 @@
                     self.loadings.push(new Loading(loadingData.url, false, false));
                 }
             }
-            for (var i = 0; i < data.running.length; i++) {
-                var loadingData = data.running[i];
-                var loading;
+            for (i = 0; i < data.running.length; i++) {
+                loadingData = data.running[i];
                 if (loading = self.findLoadingByUrl(loadingData.url)) {
                     loading.started = true;
                     loading.finished = false;
@@ -60,9 +59,8 @@
                     self.loadings.push(new Loading(loadingData.url, true, false));
                 }
             }
-            for (var i = 0; i < data['finished'].length; i++) {
-                var loadingData = data['finished'][i];
-                var loading;
+            for (i = 0; i < data['finished'].length; i++) {
+                loadingData = data['finished'][i];
                 if (loading = self.findLoadingByUrl(loadingData.url)) {
                     loading.started = true;
                     loading.finished = true;
