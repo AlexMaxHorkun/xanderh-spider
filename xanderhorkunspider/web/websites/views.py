@@ -151,4 +151,4 @@ def spider_status_view(request):
             'url': p.url,
             'website': {'name': p.website.name}
         })
-    return http.HttpResponse(json.dumps(response_data), mimetype="application/json")
+    return http.HttpResponse(json.dumps(response_data), content_type="application/json")

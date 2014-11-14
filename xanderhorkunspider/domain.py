@@ -39,13 +39,13 @@ class Websites(object):
         if loading.page.id == 0:
             try:
                 self._page_dao.persist(loading.page)
-            except:
+            except Exception as exc:
                 # Maybe page with such URL already exists
                 page = self._page_dao.find_by_url(loading.page.url)
                 if page:
                     loading.page = page
                 else:
-                    raise RuntimeError(message="Failed to persist page with url '%s'" % loading.page.url)
+                    raise exc
         if loading.id == 0:
             self._loading_dao.persist(loading)
         else:

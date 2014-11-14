@@ -36,53 +36,45 @@
         if (this.isUpdating) return;
         this.isUpdating = true;
         var self = this;
-        $.ajax(this.url, {
-            type: "GET",
-            dataType: "json",
-            success: function (data, status, xhr) {
-                this.isRunnig = data.is_alive;
-                for (var i = 0; i < data.waiting.length; i++) {
-                    var loadingData = data.waiting[i];
-                    var loading;
-                    if (loading = this.findLoadingByUrl(loadingData.url)) {
-                        loading.started = false;
-                        loading.finished = false;
-                    }
-                    else {
-                        self.loadings.push(new Loading(loadingData.url, false, false));
-                    }
+        $.get(this.receiveStatusUrl, {}, function (data) {
+            this.isRunnig = data.is_alive;
+            for (var i = 0; i < data.waiting.length; i++) {
+                var loadingData = data.waiting[i];
+                var loading;
+                if (loading = self.findLoadingByUrl(loadingData.url)) {
+                    loading.started = false;
+                    loading.finished = false;
                 }
-                for (var i = 0; i < data.running.length; i++) {
-                    var loadingData = data.running[i];
-                    var loading;
-                    if (loading = this.findLoadingByUrl(loadingData.url)) {
-                        loading.started = true;
-                        loading.finished = false;
-                    }
-                    else {
-                        self.loadings.push(new Loading(loadingData.url, true, false));
-                    }
+                else {
+                    self.loadings.push(new Loading(loadingData.url, false, false));
                 }
-                for (var i = 0; i < data['finished'].length; i++) {
-                    var loadingData = data['finished'][i];
-                    var loading;
-                    if (loading = self.findLoadingByUrl(loadingData.url)) {
-                        loading.started = true;
-                        loading.finished = true;
-                    }
-                    else {
-                        self.loadings.push(new Loading(loadingData.url, true, true));
-                    }
-                }
-                self.renderer.render(this.loadings, this.isRunnig);
-                setTimeout(function () {
-                    self.isUpdating = false;
-                }, 250);
-            },
-            error: function () {
-                console.log("Error occurred during spider's status update");
-                self.isUpdating = false;
             }
+            for (var i = 0; i < data.running.length; i++) {
+                var loadingData = data.running[i];
+                var loading;
+                if (loading = self.findLoadingByUrl(loadingData.url)) {
+                    loading.started = true;
+                    loading.finished = false;
+                }
+                else {
+                    self.loadings.push(new Loading(loadingData.url, true, false));
+                }
+            }
+            for (var i = 0; i < data['finished'].length; i++) {
+                var loadingData = data['finished'][i];
+                var loading;
+                if (loading = self.findLoadingByUrl(loadingData.url)) {
+                    loading.started = true;
+                    loading.finished = true;
+                }
+                else {
+                    self.loadings.push(new Loading(loadingData.url, true, true));
+                }
+            }
+            self.renderer.render(self.loadings, self.isRunnig);
+            setTimeout(function () {
+                self.isUpdating = false;
+            }, 250);
         });
     };
 
@@ -113,8 +105,8 @@
             return statusText;
         };
         var $loadings = $("#spider-status #loadings");
-        for (var i = 0; i < this.loadings.length; i++) {
-            var loading = this.spider.loadings[i];
+        for (var i = 0; i < loadings.length; i++) {
+            var loading = loadings[i];
             var $item = $loadings.find("li[page-url='" + loading.url + "']");
             if ($item) {
                 if ($item.attr("started") != loading.started || $item.attr("finished") != loading.finished) {
@@ -140,5 +132,7 @@
 
     var spiderStatus = new SpiderStatus("{% url 'spider_status' %}", new SpiderStatusRenderer());
     spiderStatus.update();
-    var updateInterval = setInterval(spiderStatus.update, 1000);
+    var updateInterval = setInterval(function (spiderStatus) {
+        spiderStatus.update();
+    }(spiderStatus), 1000);
 </script>
