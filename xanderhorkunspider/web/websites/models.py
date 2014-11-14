@@ -145,7 +145,7 @@ class LoadingModel(models.Model, Loading):
     page = models.ForeignKey(PageModel, related_name='loadings_set')
     success = models.BooleanField(default=False)
     headers = {}
-    headers_serialized = models.CharField(max_length=2048)
+    headers_serialized = models.CharField(max_length=4096)
     content = models.CharField(max_length=512000)
     time = models.DateTimeField(auto_now=True)
     loading_time = models.PositiveIntegerField()
