@@ -146,4 +146,8 @@ def spider_status_view(request):
             crawling_data['finished'] = crawling.finished.strftime("%y,%m,%d,%H,%M,%S")
         response_data['loadings'].append(crawling_data)
 
+    if hasattr(request.GET, 'website_id'):
+        website = domain.websites_domain.find(request.GET['website_id'])
+        if website:
+            response_data['pages_count'] = website.pages.count()
     return http.HttpResponse(json.dumps(response_data), content_type="application/json")

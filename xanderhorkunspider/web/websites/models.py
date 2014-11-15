@@ -90,7 +90,7 @@ class WebsitesDBDao(WebsiteDao):
 class PageModel(models.Model, Page):
     id = models.AutoField(primary_key=True)
     url = models.CharField(max_length=255, unique=True)
-    website = models.ForeignKey(WebsitesModel, related_name='pages_set')
+    website = models.ForeignKey(WebsitesModel, related_name='pages_set', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.url
@@ -149,7 +149,7 @@ class PagesDBDao(PageDao):
 
 class LoadingModel(models.Model, Loading):
     id = models.AutoField(primary_key=True)
-    page = models.ForeignKey(PageModel, related_name='loadings_set')
+    page = models.ForeignKey(PageModel, related_name='loadings_set', on_delete=models.CASCADE)
     success = models.BooleanField(default=False)
     headers = {}
     headers_serialized = models.CharField(max_length=4096)

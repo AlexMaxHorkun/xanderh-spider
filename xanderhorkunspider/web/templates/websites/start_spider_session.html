@@ -9,6 +9,10 @@
     </div>
 </div>
 <script>
+    {% if website %}
+    var websiteId = {{ website.id }};
+    {% endif %}
+
     function Loading(id, url, started, finished) {
         this.url = url;
         this.started = started;
@@ -17,12 +21,14 @@
     }
 
 
-    function SpiderStatus(url, renderer) {
+    function SpiderStatus(url, renderer, websiteId) {
         this.receiveStatusUrl = url;
         this.loadings = [];
-        this.isRunnig = false;
+        this.isRunning = false;
         this.renderer = renderer;
         this.isUpdating = false;
+        this.websitePagesCount = 0;
+        this.websiteId = websiteId;
     }
 
     SpiderStatus.prototype.findLoadingById = function (id) {
@@ -37,8 +43,15 @@
         if (this.isUpdating) return;
         this.isUpdating = true;
         var self = this;
-        $.get(this.receiveStatusUrl, {}, function (data) {
-            self.isRunnig = data.is_alive;
+        var data = {};
+        if(this.websiteId){
+            data.website_id = this.websiteId;
+        }
+        $.get(this.receiveStatusUrl, data, function (data) {
+            self.isRunning = data.is_alive;
+            if(data.pages_count){
+                self.websitePagesCount = data.pages_count;
+            }
             for (var i = 0; i < data.loadings.length; i++) {
                 var loadingData = data.loadings[i];
                 var started;
@@ -67,7 +80,7 @@
                 }
                 return (a.started < b.started) ? 1 : -1;
             });
-            self.renderer.render(self.loadings, self.isRunnig);
+            self.renderer.render(self.loadings, self.isRunning, self.websitePagesCount);
             setTimeout(function () {
                 self.isUpdating = false;
             }, 250);
@@ -79,7 +92,7 @@
         this.maxLoadingNameLength = 40;
         this.maxItemsShow = 100;
     }
-    SpiderStatusRenderer.prototype.render = function (loadings, isAlive) {
+    SpiderStatusRenderer.prototype.render = function (loadings, isAlive, pagesCount) {
         if (isAlive) {
             $("#spider-status #spider-stance #running").show();
             $("#spider-status #spider-stance #stopped").hide();
@@ -87,6 +100,9 @@
         else {
             $("#spider-status #spider-stance #running").hide();
             $("#spider-status #spider-stance #stopped").show();
+        }
+        if(pagesCount){
+            $("#spider-session #website-pages-count").text(pagesCount);
         }
         $("#spider-status #loadings li[finished='true'], #spider-status #loadings li[finished='1']").remove();
         var fetchStatus = function (started, finished) {
@@ -124,7 +140,7 @@
         }
     };
 
-    var spiderStatus = new SpiderStatus("{% url 'spider_status' %}", new SpiderStatusRenderer());
+    var spiderStatus = new SpiderStatus("{% url 'spider_status' %}", new SpiderStatusRenderer(), websiteId);
     spiderStatus.update();
     var updateInterval = setInterval(function (spiderStatus) {
         return function () {
