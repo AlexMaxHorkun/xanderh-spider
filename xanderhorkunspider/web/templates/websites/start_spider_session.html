@@ -3,6 +3,8 @@
         <span id="running" {% if not spider.is_alive %}style="display: none"{% endif %}>Spider is running</span>
         <span id="stopped" {% if spider.is_alive %}style="display: none"{% endif %}>Spider is stoped</span>
     </h2>
+    <br>
+    <input type="checkbox" id="stop-when-done"> Stop as soon as possible<br>
 
     <div>
         <ul id="loadings"></ul>
@@ -29,6 +31,7 @@
         this.isUpdating = false;
         this.websitePagesCount = 0;
         this.websiteId = websiteId;
+        this.stopWhenDone = false;
     }
 
     SpiderStatus.prototype.findLoadingById = function (id) {
@@ -43,7 +46,7 @@
         if (this.isUpdating) return;
         this.isUpdating = true;
         var self = this;
-        var data = {};
+        var data = { stop_when_done: +this.stopWhenDone };
         if(this.websiteId){
             data.website_id = this.websiteId;
         }
@@ -83,7 +86,7 @@
             self.renderer.render(self.loadings, self.isRunning, self.websitePagesCount);
             setTimeout(function () {
                 self.isUpdating = false;
-            }, 250);
+            }, 500);
         });
     };
 
@@ -104,7 +107,7 @@
         if(pagesCount){
             $("#spider-session #website-pages-count").text(pagesCount);
         }
-        $("#spider-status #loadings li[finished='true'], #spider-status #loadings li[finished='1']").remove();
+        $("#spider-status #loadings li").remove();
         var fetchStatus = function (started, finished) {
             var statusText;
             if (started && !finished) {
@@ -121,30 +124,30 @@
         var $loadings = $("#spider-status #loadings");
         for (var i = 0; i < loadings.length; i++) {
             var loading = loadings[i];
-            var $item = $loadings.find("li[page-id='" + loading.id + "']").get(0);
-            if ($item) {
-                $item = $($item);
-                $item.find("#text-status").text(fetchStatus(loading.started, loading.finished));
+            var loadingName = "";
+            if (loading.url.length > this.maxLoadingNameLength) {
+                loadingName = loading.url.substr(0, this.maxLoadingNameLength) + "...";
             }
             else {
-                var loadingName = "";
-                if (loading.url.length > this.maxLoadingNameLength) {
-                    loadingName = loading.url.substr(0, this.maxLoadingNameLength) + "...";
-                }
-                else {
-                    loadingName = loading.url;
-                }
-                $loadings.append('<li page-id="' + loading.id + '">' + loadingName
-                        + ' <span id="text-status">' + fetchStatus(loading.started, loading.finished) + '</span></li>');
+                loadingName = loading.url;
             }
+            $loadings.append('<li page-id="' + loading.id + '" finished="'+(+!!loading.finished)+'">' + loadingName
+                + ' <span id="text-status">' + fetchStatus(loading.started, loading.finished) + '</span></li>');
         }
     };
 
-    var spiderStatus = new SpiderStatus("{% url 'spider_status' %}", new SpiderStatusRenderer(), websiteId);
+    var $stopWhenDone = $("#spider-status #stop-when-done");
+    var spiderStatus = new SpiderStatus("{% url 'spider_status' %}",
+        new SpiderStatusRenderer(), websiteId, $stopWhenDone.is(":checked"));
+    $stopWhenDone.on("change", function(){
+        spiderStatus.stopWhenDone = $stopWhenDone.is(":checked");
+        console.log("Will stop when possible");
+    });
     spiderStatus.update();
     var updateInterval = setInterval(function (spiderStatus) {
         return function () {
             spiderStatus.update();
         };
     }(spiderStatus), 1000);
+
 </script>
