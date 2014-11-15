@@ -129,7 +129,7 @@ def spider_status_view(request):
     """
     Gets information about spider and it's processes. Returns json.
     """
-    info = domain.spider_manager.crawling_info()
+    info = domain.spider_manager.active_processes_info()
     response_data = {'is_alive': domain.spider_manager.is_alive(), 'loadings': list()}
     for crawling in info:
         crawling_data = {

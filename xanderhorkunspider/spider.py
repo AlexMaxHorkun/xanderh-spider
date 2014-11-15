@@ -180,7 +180,7 @@ class SpiderManager(threading.Thread):
 
     def crawl(self, page):
         """
-        Starts a proccess of crawling on page.
+        Starts a process of crawling on page.
         :param page: Page.
         """
         self.__processes.append(CrawlingProcess(page, self.spider, self.websites, self.evaluator))
@@ -215,7 +215,7 @@ class SpiderManager(threading.Thread):
         while True:
             for p in self.__processes:
                 if not p.is_alive():
-                    if not p.finished:
+                    if not p.finished and not self.stop_when_done:
                         self._start_process(p)
                     else:
                         self._process_crawling_result(p)

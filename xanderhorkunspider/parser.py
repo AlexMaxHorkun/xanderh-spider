@@ -24,7 +24,7 @@ class LinksParser(object):
         return valid_host and valid_protoloc
 
     def parse(self, loading):
-        match = re.findall(r'<a\s.*?href="(.*?)".*?>', loading.content)
+        match = re.findall(r'<a\s.*?href="([^#]*?)[#"]', loading.content)
         urls = set()
         page_url_data = urllib.parse.urlparse(loading.page.url)
         for url in match:
