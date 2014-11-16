@@ -4,7 +4,8 @@
         <span id="stopped" {% if spider.is_alive %}style="display: none"{% endif %}>Spider is stoped</span>
     </h2>
     <br>
-    <input type="checkbox" id="stop-when-done"> Stop as soon as possible<br>
+    <input type="checkbox" id="stop-when-done"> Stop as soon as possible
+    <span>Running processes: <span id="running-count">0</span></span>
 
     <div>
         <ul id="loadings"></ul>
@@ -52,6 +53,7 @@
         }
         $.get(this.receiveStatusUrl, data, function (data) {
             self.isRunning = data.is_alive;
+            self.loadings = [];
             if(data.pages_count){
                 self.websitePagesCount = data.pages_count;
             }
@@ -107,7 +109,8 @@
         if(pagesCount){
             $("#spider-session #website-pages-count").text(pagesCount);
         }
-        $("#spider-status #loadings li").remove();
+        $("#spider-status #running-count").text(loadings.length);
+        $("#spider-status #loadings").html("");
         var fetchStatus = function (started, finished) {
             var statusText;
             if (started && !finished) {
@@ -146,7 +149,12 @@
     spiderStatus.update();
     var updateInterval = setInterval(function (spiderStatus) {
         return function () {
-            spiderStatus.update();
+            if(!spiderStatus.isRunning){
+                clearInterval(updateInterval);
+            }
+            else{
+                spiderStatus.update();
+            }
         };
     }(spiderStatus), 1000);
 
