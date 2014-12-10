@@ -3,6 +3,11 @@
         <span id="running" {% if not spider.is_alive %}style="display: none"{% endif %}>Spider is running</span>
         <span id="stopped" {% if spider.is_alive %}style="display: none"{% endif %}>Spider is stoped</span>
     </h2>
+
+    <div>
+        This spider sessions page
+        <a href="{% url 'spider_session' wid=website.id %}?spider_id={{ spider_id }}"></a>
+    </div>
     <br>
     <input type="checkbox" id="stop-when-done"> Stop as soon as possible
     <span>Running processes: <span id="running-count">0</span></span>
@@ -28,6 +33,9 @@
     var updateInterval = setInterval(function (spiderStatus) {
         return function () {
             spiderStatus.update();
+            if (!spiderStatus.isRunning) {
+                clearInterval(updateInterval);
+            }
         };
     }(spiderStatus), 1000);
 </script>

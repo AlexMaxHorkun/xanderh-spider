@@ -7,8 +7,8 @@
                 <h4>Pages count: <span id="website-pages-count">{{ website.pages_count }}</span></h4>
             </td>
 
-            <td id="spider-info" valign="top">
-                {% if not spider_manager %}
+            <td id="spider-info" valign="top" {% if spider_id %}spider-id="{{ spider_id }}{% endif %}">
+                {% if not spider_id %}
                     <h2>Set options for spider</h2>
                     <div id="spider-options">
                         <div id="max_processes">
@@ -19,6 +19,8 @@
                         </div>
                     </div>
                     <button type="button" id="start-button" website-id="{{ website.id }}">Start</button>
+                {% else %}
+                    <h2>Spider session #{{ spider_id }}</h2>
                 {% endif %}
             </td>
         </tr>

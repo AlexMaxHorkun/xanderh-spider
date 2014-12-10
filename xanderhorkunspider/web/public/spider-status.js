@@ -107,6 +107,7 @@ SpiderStatusRenderer.prototype.render = function (loadings, isAlive, pagesCount)
         return statusText;
     };
     var $loadings = $("#spider-status #loadings");
+    $loadings.html("");
     for (var i = 0; i < loadings.length; i++) {
         var loading = loadings[i];
         var loadingName = "";

@@ -105,24 +105,30 @@ def spider_session_view(request, wid):
     website = websites.find(wid)
     if not website:
         raise http.Http404()
-    return shortcuts.render(request, 'websites/spider_session.html', {'website': website})
+    return shortcuts.render(request, 'websites/spider_session.html',
+                            {'website': website, 'spider_id': getattr(request.GET, 'spider_id', 0)})
 
 
 def start_spider_session_view(request):
     wid = request.GET.get('website')
     max_processes = int(request.GET.get('max_processes'))
-    spider = domain.spider_factory.create_spider()
     if not wid:
         raise http.Http404()
-    if max_processes:
-        spider.max_process_count = max_processes
     website = domain.websites_domain.find(wid)
-    if (not website) or (not len(website.pages)):
-        raise http.Http404()
-    for p in website.pages:
-        spider.crawl(p)
-    if not spider.is_alive():
-        spider.start()
+    if hasattr(request.GET, 'spider_id'):
+        spider = domain.spider_factory.find_spider_by_id(request.GET['spider_id'])
+        if not spider:
+            raise ValueError("No spider found with ID %s" % request.GET['spider_id'])
+    else:
+        spider = domain.spider_factory.create_spider()
+        if max_processes:
+            spider.max_process_count = max_processes
+        if (not website) or (not len(website.pages)):
+            raise http.Http404()
+        for p in website.pages:
+            spider.crawl(p)
+        if not spider.is_alive():
+            spider.start()
     return shortcuts.render(request, "websites/start_spider_session.html",
                             {'spider': spider, 'website': website, 'spider_id': id(spider)})
 
@@ -134,20 +140,15 @@ def spider_status_view(request, sid):
     spider_manager = domain.spider_factory.find_spider_by_id(sid)
     if not spider_manager:
         raise ValueError("No spider with ID '%s' found" % sid)
-    info = spider_manager.crawling_info()
+    info = spider_manager.active_processes_info()
     response_data = {'is_alive': spider_manager.is_alive(), 'loadings': list()}
     for crawling in info:
         crawling_data = {
             'url': crawling.page.url,
             'website': {'name': crawling.page.website.name},
             'id': base64.urlsafe_b64encode(str.encode(crawling.page.url)).decode(),
-            'started': 0,
-            'finished': 0,
+            'started': crawling.started.strftime("%y,%m,%d,%H,%M,%S")
         }
-        if crawling.started:
-            crawling_data['started'] = crawling.started.strftime("%y,%m,%d,%H,%M,%S")
-        if crawling.finished:
-            crawling_data['finished'] = crawling.finished.strftime("%y,%m,%d,%H,%M,%S")
         response_data['loadings'].append(crawling_data)
 
     if 'website_id' in request.GET:

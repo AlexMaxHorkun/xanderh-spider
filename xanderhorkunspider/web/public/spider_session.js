@@ -9,3 +9,9 @@ $("#start-button").on("click", function (e) {
         $("#spider-info").append(data);
     });
 });
+var spiderId = parseInt($("#spider-info").attr("spider-id"));
+if (spiderId) {
+    $.get("/spider_session", {max_processes: maxP, website: websiteId, spider_id: spiderId}, function (data) {
+        $("#spider-info").append(data);
+    });
+}
