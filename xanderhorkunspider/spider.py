@@ -173,18 +173,14 @@ class SpiderManager(threading.Thread):
 
     def is_done(self):
         """
-        Check if no processes are running or in queue.
+        Check all processes are finished.
         :return: bool.
         """
-        for p in self.__processes:
-            if not p.finished:
-                return False
-
-        return True
+        return len(self.__processes) == 0
 
     def crawl(self, page):
         """
-        Starts a proccess of crawling on page.
+        Starts a process of crawling on page.
         :param page: Page.
         """
         self.__processes.append(CrawlingProcess(page, self.spider, self.websites, self.evaluator))
@@ -205,7 +201,7 @@ class SpiderManager(threading.Thread):
 
         :param crawling_process: CrawlingProcess
         """
-        if crawling_process.resulting_links is not None:
+        if crawling_process.resulting_links is not None and not self.stop_when_done:
             for l in crawling_process.resulting_links:
                 page = self.websites.find_page_by_url(l)
                 if page is None:
@@ -219,15 +215,15 @@ class SpiderManager(threading.Thread):
         while True:
             for p in self.__processes:
                 if not p.is_alive():
-                    if not p.finished:
+                    if not p.finished and not self.stop_when_done:
                         self._start_process(p)
                     else:
                         self._process_crawling_result(p)
                         self.finished_processes.append(
                             CrawlingInfo(p.resulting_loading, p.page, p.resulting_links, p.started, p.finished))
                         self.__processes.remove(p)
-                if self.stop_when_done and self.is_done():
-                    break
+            if self.stop_when_done and self.is_done():
+                break
             time.sleep(1)
 
     def active_processes_info(self):

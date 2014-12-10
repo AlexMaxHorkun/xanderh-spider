@@ -6,7 +6,6 @@ import base64
 
 from django import shortcuts
 from django import http
-
 from xanderhorkunspider.web.websites import models
 from xanderhorkunspider.web.websites import forms
 from xanderhorkunspider.web.websites import domain
@@ -150,4 +149,11 @@ def spider_status_view(request, sid):
             crawling_data['finished'] = crawling.finished.strftime("%y,%m,%d,%H,%M,%S")
         response_data['loadings'].append(crawling_data)
 
+    if 'website_id' in request.GET:
+        website = domain.websites_domain.find(request.GET['website_id'])
+        if website:
+            response_data['pages_count'] = website.pages.count()
+    if 'stop_when_done' in request.GET:
+        if int(request.GET['stop_when_done']) != 0:
+            domain.spider_manager.stop_when_done = True
     return http.HttpResponse(json.dumps(response_data), content_type="application/json")
