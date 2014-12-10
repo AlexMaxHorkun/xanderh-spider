@@ -17,5 +17,5 @@ urlpatterns = patterns('',
                        url(r'^delete_page/(\d+)$', views.delete_page_view, name='delete_page'),
                        url(r'^spider_session/webiste-(?P<wid>\d+)$', views.spider_session_view, name='spider_session'),
                        url(r'^spider_session$', views.start_spider_session_view, name='start_spider_session'),
-                       url(r'^spider-status$', views.spider_status_view, name='spider_status')
+                       url(r'^spider-status/(.+)$', views.spider_status_view, name='spider_status')
 )

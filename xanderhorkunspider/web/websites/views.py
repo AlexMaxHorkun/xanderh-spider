@@ -111,27 +111,31 @@ def spider_session_view(request, wid):
 def start_spider_session_view(request):
     wid = request.GET.get('website')
     max_processes = int(request.GET.get('max_processes'))
+    spider = domain.spider_factory.create_spider()
     if not wid:
         raise http.Http404()
     if max_processes:
-        domain.spider_manager.max_process_count = max_processes
+        spider.max_process_count = max_processes
     website = domain.websites_domain.find(wid)
     if (not website) or (not len(website.pages)):
         raise http.Http404()
     for p in website.pages:
-        domain.spider_manager.crawl(p)
-    if not domain.spider_manager.is_alive():
-        domain.spider_manager.start()
+        spider.crawl(p)
+    if not spider.is_alive():
+        spider.start()
     return shortcuts.render(request, "websites/start_spider_session.html",
-                            {'spider': domain.spider_manager, 'website': website})
+                            {'spider': spider, 'website': website, 'spider_id': id(spider)})
 
 
-def spider_status_view(request):
+def spider_status_view(request, sid):
     """
     Gets information about spider and it's processes. Returns json.
     """
-    info = domain.spider_manager.crawling_info()
-    response_data = {'is_alive': domain.spider_manager.is_alive(), 'loadings': list()}
+    spider_manager = domain.spider_factory.find_spider_by_id(sid)
+    if not spider_manager:
+        raise ValueError("Now spider with ID '%s' found" % sid)
+    info = spider_manager.crawling_info()
+    response_data = {'is_alive': spider_manager.is_alive(), 'loadings': list()}
     for crawling in info:
         crawling_data = {
             'url': crawling.page.url,
