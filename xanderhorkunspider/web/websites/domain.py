@@ -40,7 +40,9 @@ class SpiderFactory(object):
         if not max_p:
             max_p = self.max_processes
         spdr = spider.SpiderManager(websites, max_p=max_p, autostart=autostart)
+        print("Adding spider with ID %s" % id(spdr))
         self.spiders.append(spdr)
+        print(repr(self.spiders))
         return spdr
 
     def find_spider_by_id(self, sid):
@@ -49,6 +51,7 @@ class SpiderFactory(object):
         :param sid: Integer
         :return: None or spider.
         """
+        sid = int(sid)
         for spdr in self.spiders:
             if id(spdr) == sid:
                 return spdr

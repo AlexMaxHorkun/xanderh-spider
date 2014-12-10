@@ -6,6 +6,7 @@ import base64
 
 from django import shortcuts
 from django import http
+
 from xanderhorkunspider.web.websites import models
 from xanderhorkunspider.web.websites import forms
 from xanderhorkunspider.web.websites import domain
@@ -26,7 +27,7 @@ def edit_website_view(request, wid=None):
     template = 'websites/add_website.html'
     websites = domain.websites_domain  # domain.Websites(dao.PageDao(), models.WebsitesDBDao(), dao.LoadingDao())
     website = None
-    if not wid is None:
+    if wid is not None:
         website = websites.find(wid)
     if not website:
         website = models.WebsitesModel()
@@ -132,7 +133,7 @@ def spider_status_view(request, sid):
     """
     spider_manager = domain.spider_factory.find_spider_by_id(sid)
     if not spider_manager:
-        raise ValueError("Now spider with ID '%s' found" % sid)
+        raise ValueError("No spider with ID '%s' found" % sid)
     info = spider_manager.crawling_info()
     response_data = {'is_alive': spider_manager.is_alive(), 'loadings': list()}
     for crawling in info:
@@ -155,5 +156,5 @@ def spider_status_view(request, sid):
             response_data['pages_count'] = website.pages.count()
     if 'stop_when_done' in request.GET:
         if int(request.GET['stop_when_done']) != 0:
-            domain.spider_manager.stop_when_done = True
+            spider_manager.stop_when_done = True
     return http.HttpResponse(json.dumps(response_data), content_type="application/json")

@@ -7,6 +7,5 @@ $("#start-button").on("click", function (e) {
     }
     $.get("/spider_session", {max_processes: maxP, website: websiteId}, function (data) {
         $("#spider-info").append(data);
-        console.log("test");
     });
 });

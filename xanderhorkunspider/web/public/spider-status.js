@@ -6,12 +6,15 @@ function Loading(id, url, started, finished) {
 }
 
 
-function SpiderStatus(url, renderer, spiderId) {
+function SpiderStatus(url, renderer, websiteId) {
     this.receiveStatusUrl = url;
     this.loadings = [];
-    this.isRunnig = false;
+    this.isRunning = false;
     this.renderer = renderer;
     this.isUpdating = false;
+    this.websitePagesCount = 0;
+    this.websiteId = websiteId;
+    this.stopWhenDone = false;
 }
 
 SpiderStatus.prototype.findLoadingById = function (id) {
@@ -26,8 +29,16 @@ SpiderStatus.prototype.update = function () {
     if (this.isUpdating) return;
     this.isUpdating = true;
     var self = this;
-    $.get(this.receiveStatusUrl, {}, function (data) {
-        self.isRunnig = data.is_alive;
+    var data = {stop_when_done: +this.stopWhenDone};
+    if (this.websiteId) {
+        data.website_id = this.websiteId;
+    }
+    $.get(this.receiveStatusUrl, data, function (data) {
+        self.isRunning = data.is_alive;
+        self.loadings = [];
+        if (data.pages_count) {
+            self.websitePagesCount = data.pages_count;
+        }
         for (var i = 0; i < data.loadings.length; i++) {
             var loadingData = data.loadings[i];
             var started;
@@ -56,10 +67,10 @@ SpiderStatus.prototype.update = function () {
             }
             return (a.started < b.started) ? 1 : -1;
         });
-        self.renderer.render(self.loadings, self.isRunnig);
+        self.renderer.render(self.loadings, self.isRunning, self.websitePagesCount);
         setTimeout(function () {
             self.isUpdating = false;
-        }, 250);
+        }, 500);
     });
 };
 
@@ -68,7 +79,7 @@ function SpiderStatusRenderer() {
     this.maxLoadingNameLength = 40;
     this.maxItemsShow = 100;
 }
-SpiderStatusRenderer.prototype.render = function (loadings, isAlive) {
+SpiderStatusRenderer.prototype.render = function (loadings, isAlive, pagesCount) {
     if (isAlive) {
         $("#spider-status #spider-stance #running").show();
         $("#spider-status #spider-stance #stopped").hide();
@@ -77,7 +88,11 @@ SpiderStatusRenderer.prototype.render = function (loadings, isAlive) {
         $("#spider-status #spider-stance #running").hide();
         $("#spider-status #spider-stance #stopped").show();
     }
-    $("#spider-status #loadings li[finished='true'], #spider-status #loadings li[finished='1']").remove();
+    if (pagesCount) {
+        $("#spider-session #website-pages-count").text(pagesCount);
+    }
+    $("#spider-status #running-count").text(loadings.length);
+    $("#spider-status #loadings").html("");
     var fetchStatus = function (started, finished) {
         var statusText;
         if (started && !finished) {
@@ -94,21 +109,14 @@ SpiderStatusRenderer.prototype.render = function (loadings, isAlive) {
     var $loadings = $("#spider-status #loadings");
     for (var i = 0; i < loadings.length; i++) {
         var loading = loadings[i];
-        var $item = $loadings.find("li[page-id='" + loading.id + "']").get(0);
-        if ($item) {
-            $item = $($item);
-            $item.find("#text-status").text(fetchStatus(loading.started, loading.finished));
+        var loadingName = "";
+        if (loading.url.length > this.maxLoadingNameLength) {
+            loadingName = loading.url.substr(0, this.maxLoadingNameLength) + "...";
         }
         else {
-            var loadingName = "";
-            if (loading.url.length > this.maxLoadingNameLength) {
-                loadingName = loading.url.substr(0, this.maxLoadingNameLength) + "...";
-            }
-            else {
-                loadingName = loading.url;
-            }
-            $loadings.append('<li page-id="' + loading.id + '">' + loadingName
-                             + ' <span id="text-status">' + fetchStatus(loading.started, loading.finished) + '</span></li>');
+            loadingName = loading.url;
         }
+        $loadings.append('<li page-id="' + loading.id + '" finished="' + (+!!loading.finished) + '">' + loadingName
+        + ' <span id="text-status">' + fetchStatus(loading.started, loading.finished) + '</span></li>');
     }
 };
