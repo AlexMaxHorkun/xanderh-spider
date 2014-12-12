@@ -6,14 +6,15 @@ function Loading(id, url, started, finished) {
 }
 
 
-function SpiderStatus(url, renderer, websiteId) {
+function SpiderStatus(url, renderer) {
     this.receiveStatusUrl = url;
     this.loadings = [];
     this.isRunning = false;
     this.renderer = renderer;
     this.isUpdating = false;
     this.websitePagesCount = 0;
-    this.websiteId = websiteId;
+    this.websiteId = 0;
+    this.spiderId = 0;
     this.stopWhenDone = false;
 }
 
@@ -30,7 +31,10 @@ SpiderStatus.prototype.update = function () {
     this.isUpdating = true;
     var self = this;
     var data = {stop_when_done: +this.stopWhenDone};
-    if (this.websiteId) {
+    if (this.spiderId) {
+        data.spider_id = this.spiderId;
+    }
+    else if (this.websiteId) {
         data.website_id = this.websiteId;
     }
     $.get(this.receiveStatusUrl, data, function (data) {

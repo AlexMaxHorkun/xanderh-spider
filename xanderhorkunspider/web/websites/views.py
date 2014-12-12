@@ -105,17 +105,25 @@ def spider_session_view(request, wid):
     website = websites.find(wid)
     if not website:
         raise http.Http404()
+    if 'spider_id' in request.GET:
+        spider_id = int(request.GET['spider_id'])
+    else:
+        spider_id = 0
     return shortcuts.render(request, 'websites/spider_session.html',
-                            {'website': website, 'spider_id': getattr(request.GET, 'spider_id', 0)})
+                            {'website': website, 'spider_id': spider_id})
 
 
 def start_spider_session_view(request):
     wid = request.GET.get('website')
-    max_processes = int(request.GET.get('max_processes'))
+    sid = request.GET.get('spider_id')
+    if request.GET.get('max_processes'):
+        max_processes = int(request.GET.get('max_processes'))
+    else:
+        max_processes = 5
     if not wid:
         raise http.Http404()
     website = domain.websites_domain.find(wid)
-    if hasattr(request.GET, 'spider_id'):
+    if sid:
         spider = domain.spider_factory.find_spider_by_id(request.GET['spider_id'])
         if not spider:
             raise ValueError("No spider found with ID %s" % request.GET['spider_id'])

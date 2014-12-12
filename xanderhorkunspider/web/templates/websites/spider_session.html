@@ -1,13 +1,13 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <table id="spider-session">
+    <table id="spider-session" website-id="{{ website.id }}">
         <tr>
             <td valign="top">
                 <h2>Spider session for "{{ website.name }}"</h2>
                 <h4>Pages count: <span id="website-pages-count">{{ website.pages_count }}</span></h4>
             </td>
 
-            <td id="spider-info" valign="top" {% if spider_id %}spider-id="{{ spider_id }}{% endif %}">
+            <td id="spider-info" valign="top" {% if spider_id > 0 %}spider-id="{{ spider_id }}"{% endif %}>
                 {% if not spider_id %}
                     <h2>Set options for spider</h2>
                     <div id="spider-options">
@@ -18,7 +18,7 @@
                             </label>
                         </div>
                     </div>
-                    <button type="button" id="start-button" website-id="{{ website.id }}">Start</button>
+                    <button type="button" id="start-button">Start</button>
                 {% else %}
                     <h2>Spider session #{{ spider_id }}</h2>
                 {% endif %}

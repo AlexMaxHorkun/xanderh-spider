@@ -5,8 +5,8 @@
     </h2>
 
     <div>
-        This spider sessions page
-        <a href="{% url 'spider_session' wid=website.id %}?spider_id={{ spider_id }}"></a>
+        <a target="_blank" href="{% url 'spider_session' wid=website.id %}?spider_id={{ spider_id }}">This spider
+            sessions page</a>
     </div>
     <br>
     <input type="checkbox" id="stop-when-done"> Stop as soon as possible
@@ -19,13 +19,13 @@
 {% load staticfiles %}
 <script src="{% static 'spider-status.js' %}"></script>
 <script>
-    {% if website %}
-        var websiteId = {{ website.id }};
-    {% endif %}
-
     var $stopWhenDone = $("#spider-status #stop-when-done");
     var spiderStatus = new SpiderStatus("{% url 'spider_status' spider_id %}",
-            new SpiderStatusRenderer(), websiteId, $stopWhenDone.is(":checked"));
+            new SpiderStatusRenderer());
+    {% if spider_id %}
+        spiderStatus.spiderId ={{ spider_id }};
+    {% endif %}
+    spiderStatus.websiteId ={{ website.id }};
     $stopWhenDone.on("change", function () {
         spiderStatus.stopWhenDone = $stopWhenDone.is(":checked");
     });
