@@ -110,7 +110,8 @@ def spider_session_view(request, wid):
     else:
         spider_id = 0
     return shortcuts.render(request, 'websites/spider_session.html',
-                            {'website': website, 'spider_id': spider_id})
+                            {'website': website, 'spider_id': spider_id,
+                             'default_max_process_count': domain.spider_factory.max_processes})
 
 
 def start_spider_session_view(request):

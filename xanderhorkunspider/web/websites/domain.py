@@ -16,7 +16,7 @@ class SpiderFactory(object):
     websites = None
     max_processes = None
 
-    def __init__(self, def_websites, def_max_p=5):
+    def __init__(self, def_websites, def_max_p=10):
         """
         Creates and stores SpiderManager instances.
         :param def_websites: Default Websites domain object to create spiders.
