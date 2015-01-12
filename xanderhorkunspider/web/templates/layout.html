@@ -8,8 +8,9 @@
     <link rel="stylesheet" href="{% static 'style.css' %}" type="text/css">
 </head>
 <body>
-<div id="header">{% block header %}Welcome!{% endblock header %}</div>
-<div id="menu">Menu: <a href="{% url 'index' %}">Websites</a></div>
+<div id="header">{% block header %}Welcome{% if request.user %}, {{ request.user.username }}{% endif %}
+    !{% endblock header %}</div>
+<div id="menu">Menu: <a href="{% url 'signup' %}">Sign up</a><a href="{% url 'index' %}">Websites</a></div>
 <div id="content">
     {% block content %}{% endblock content %}
 </div>

@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+{% block content %}
+    {% if user %}
+        <h1>You are already authenticated</h1>
+    {% else %}
+        <h1>Sign up to be able to add websites, pages and commit spider sessions</h1>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form }}
+            <input type="submit" value="Sign up">
+        </form>
+    {% endif %}
+{% endblock content %}

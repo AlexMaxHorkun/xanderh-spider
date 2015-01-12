@@ -6,6 +6,8 @@ import base64
 
 from django import shortcuts
 from django import http
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 
 from xanderhorkunspider.web.websites import models
 from xanderhorkunspider.web.websites import forms
@@ -168,3 +170,27 @@ def spider_status_view(request, sid):
         if int(request.GET['stop_when_done']) != 0:
             spider_manager.stop_when_done = True
     return http.HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+# Auth related views
+
+def signup_view(request):
+    if request.user.is_authenticated():
+        user = request.user
+    else:
+        user = None
+    if request.method == 'POST':
+        form = forms.SignupForm(request.POST)
+        if form.is_valid():
+            user = User.objects.create_user(
+                form.cleaned_data['username'],
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password']
+            )
+            if user and authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password']):
+                return shortcuts.redirect('index')
+            else:
+                raise RuntimeError("Unable to create user or authenticate")
+    else:
+        form = forms.SignupForm()
+    return shortcuts.render(request, "websites/auth/signup.html", {'form': form, 'user': user})

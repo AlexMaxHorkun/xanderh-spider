@@ -15,3 +15,9 @@ class PageForm(forms.ModelForm):
     class Meta:
         model = models.PageModel
         fields = ['url', 'website']
+
+
+class SignupForm(forms.Form):
+    username = forms.CharField(max_length=256, min_length=3, required=True)
+    email = forms.EmailField(max_length=512, min_length=5, required=True)
+    password = forms.CharField(max_length=64, min_length=7, widget=forms.PasswordInput, required=True)
