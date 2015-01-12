@@ -7,7 +7,8 @@ import base64
 from django import shortcuts
 from django import http
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
+from django import template as django_template
 
 from xanderhorkunspider.web.websites import models
 from xanderhorkunspider.web.websites import forms
@@ -22,7 +23,7 @@ def index_view(request):
     """
     websites_domain = domain.websites_domain
     websites = websites_domain.find_websites()
-    return shortcuts.render_to_response('websites/index.html', {'websites': websites})
+    return shortcuts.render(django_template.RequestContext(request), 'websites/index.html', {'websites': websites})
 
 
 def edit_website_view(request, wid=None):
@@ -182,15 +183,14 @@ def signup_view(request):
     if request.method == 'POST':
         form = forms.SignupForm(request.POST)
         if form.is_valid():
-            user = User.objects.create_user(
-                form.cleaned_data['username'],
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password']
-            )
-            if user and authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password']):
+            User.objects.create_user(form.cleaned_data['username'], email=form.cleaned_data['email'],
+                                     password=form.cleaned_data['password'])
+            user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
+            if user is not None and user.is_active:
+                login(request, user)
                 return shortcuts.redirect('index')
             else:
                 raise RuntimeError("Unable to create user or authenticate")
     else:
         form = forms.SignupForm()
-    return shortcuts.render(request, "websites/auth/signup.html", {'form': form, 'user': user})
+    return shortcuts.render(request, "websites/auth/signup.html", {'form': form})

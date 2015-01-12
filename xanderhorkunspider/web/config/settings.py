@@ -23,12 +23,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'q1gy4n0v@!nl-a=--r5wkph$#nhum#kx(25z10+1s-ph6cf0j+'
 
+LOGIN_URL = 'login'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 TEMPLATE_DEBUG = True
 
 TEMPLATE_DIRS = (BASE_DIR + '/templates',)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+)
 
 ALLOWED_HOSTS = []
 

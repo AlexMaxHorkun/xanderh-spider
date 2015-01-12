@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% block content %}
-    {% if user %}
+    {% if user.is_authenticated %}
         <h1>You are already authenticated</h1>
     {% else %}
         <h1>Sign up to be able to add websites, pages and commit spider sessions</h1>
