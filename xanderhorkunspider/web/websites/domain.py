@@ -1,11 +1,12 @@
 __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate as django_auth
 
 from xanderhorkunspider import domain
 from xanderhorkunspider.web.websites import models
+from xanderhorkunspider.web.config import settings
 from xanderhorkunspider import spider
 
 
@@ -64,11 +65,15 @@ spider_factory = SpiderFactory(websites_domain)
 
 
 class Users(object):
-    def __init__(self):
+    default_groups = set()
+
+    def __init__(self, default_groups=None):
         """
         Class is responsible for maintaining users (creation, authorization etc.)
+        :param default_groups: Default groups for all new-created users, set of Group entities.
         """
-        pass
+        if default_groups:
+            self.default_groups = set(default_groups)
 
     def create(self, username, email, password):
         """
@@ -84,14 +89,15 @@ class Users(object):
         user = User.objects.create_user(username, email=email, password=password)
         if user is None:
             raise RuntimeError("Unable to create user for some reasons")
+        user.groups.union(self.default_groups)
         return user
 
     def authenticate(self, username, password):
         """
-
-        :param username:
-        :param password:
-        :return:
+        Authenticates user.
+        :param username: User's name.
+        :param password: Password.
+        :return: User instance.
         """
         user = django_auth(username=username, password=password)
         if not user.is_active:
@@ -99,4 +105,6 @@ class Users(object):
         return user
 
 
-users = Users()
+__default_groups = Group.objects.filter(name=settings.DEFAULT_GROUPS)
+
+users = Users(default_groups=__default_groups)

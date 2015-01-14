@@ -101,3 +101,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "public"),
 )
+
+# Groups and permissions
+DEFAULT_GROUPS = ("user",)
+
+PERMISSIONS = {'user': ("edit_websites", "run_spider_sessions")}

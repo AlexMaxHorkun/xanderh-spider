@@ -5,8 +5,8 @@ from django import shortcuts
 from django.contrib.auth import login, logout
 
 from xanderhorkunspider.web.websites.domain import users
-
 from xanderhorkunspider.web.websites import forms
+
 
 
 
@@ -46,17 +46,17 @@ def logout_view(request):
 
 
 def login_view(request):
+    if request.user.is_authenticated():
+        return shortcuts.redirect('index')
     bad_credentials_error = False
-    if request.method == 'POST' and not request.user.is_authenticated:
+    if request.method == 'POST':
         if not ('username' in request.POST and 'password' in request.POST):
             bad_credentials_error = True
         else:
             user = users.authenticate(request.POST['username'], request.POST['password'])
-            print(user)
             if user:
                 login(request, user)
                 return shortcuts.redirect('index')
             else:
                 bad_credentials_error = True
-    print(bad_credentials_error)
     return shortcuts.render(request, "websites/auth/login.html", {'bad_credentials': bad_credentials_error})
