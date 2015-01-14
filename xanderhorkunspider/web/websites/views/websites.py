@@ -6,7 +6,6 @@ import base64
 
 from django import shortcuts
 from django import http
-from django import template as django_template
 
 from xanderhorkunspider.web.websites import models
 from xanderhorkunspider.web.websites import forms
@@ -21,7 +20,7 @@ def index_view(request):
     """
     websites_domain = domain.websites_domain
     websites = websites_domain.find_websites()
-    return shortcuts.render(django_template.RequestContext(request), 'websites/index.html', {'websites': websites})
+    return shortcuts.render(request, 'websites/index.html', {'websites': websites})
 
 
 def edit_website_view(request, wid=None):

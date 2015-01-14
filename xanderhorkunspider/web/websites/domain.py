@@ -1,9 +1,13 @@
 __author__ = 'Alexander Horkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate as django_auth
+
 from xanderhorkunspider import domain
 from xanderhorkunspider.web.websites import models
 from xanderhorkunspider import spider
+
 
 __websites_dao = models.WebsitesDBDao()
 __pages_dao = models.PagesDBDao()
@@ -57,3 +61,42 @@ class SpiderFactory(object):
 
 
 spider_factory = SpiderFactory(websites_domain)
+
+
+class Users(object):
+    def __init__(self):
+        """
+        Class is responsible for maintaining users (creation, authorization etc.)
+        """
+        pass
+
+    def create(self, username, email, password):
+        """
+        Creates user based on credentials, checks if user with such credentials already exists.
+        :param username: User's name.
+        :param email: E-mail.
+        :param password: User's password.
+        :raises ValueError: If user with such credentials already exists.
+        :return: User instance.
+        """
+        if (User.objects.filter(username=username) | User.objects.filter(email=username)).exists():
+            raise ValueError("Such user already exists")
+        user = User.objects.create_user(username, email=email, password=password)
+        if user is None:
+            raise RuntimeError("Unable to create user for some reasons")
+        return user
+
+    def authenticate(self, username, password):
+        """
+
+        :param username:
+        :param password:
+        :return:
+        """
+        user = django_auth(username=username, password=password)
+        if not user.is_active:
+            user = None
+        return user
+
+
+users = Users()

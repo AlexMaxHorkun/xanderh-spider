@@ -19,5 +19,7 @@ urlpatterns = patterns('',
                            name='spider_session'),
                        url(r'^spider_session$', websites.start_spider_session_view, name='start_spider_session'),
                        url(r'^spider-status/(.+)$', websites.spider_status_view, name='spider_status'),
-                       url(r'^sign-up$', auth.signup_view, name='signup')
+                       url(r'^sign-up$', auth.signup_view, name='signup'),
+                       url('logout', auth.logout_view, name='logout'),
+                       url('login', auth.login_view, name='login'),
 )

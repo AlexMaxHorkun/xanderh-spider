@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+{% block content %}
+    {% if request.user.is_authenticated %}
+        <h1>You are already authenticated</h1>
+    {% else %}
+        <h1>Login to be able to add websites, pages and commit spider sessions</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <label>Username <input type="text" name="username" required></label><br>
+            <label>Password <input type="password" name="password" required></label><br>
+            <input type="submit" value="Login">
+        </form>
+        {% if bad_credentials %}
+            <div style="color:red">
+                Bad credentials
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock content %}
