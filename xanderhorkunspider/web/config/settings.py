@@ -105,4 +105,4 @@ STATICFILES_DIRS = (
 # Groups and permissions
 DEFAULT_GROUPS = ("user",)
 
-PERMISSIONS = {'user': ("edit_websites", "run_spider_sessions")}
+DEFAULT_PERMISSIONS = {'user': ['edit_websites', "run_spider_sessions"]}
