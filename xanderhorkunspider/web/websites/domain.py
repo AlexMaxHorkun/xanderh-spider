@@ -3,6 +3,8 @@ __email__ = 'mindkilleralexs@gmail.com'
 
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate as django_auth
+from django.db import transaction
+from django.db.models import Q
 
 from xanderhorkunspider import domain
 from xanderhorkunspider.web.websites import models
@@ -86,10 +88,13 @@ class Users(object):
         """
         if (User.objects.filter(username=username) | User.objects.filter(email=username)).exists():
             raise ValueError("Such user already exists")
-        user = User.objects.create_user(username, email=email, password=password)
-        if user is None:
-            raise RuntimeError("Unable to create user for some reasons")
-        user.groups.union(self.default_groups)
+        with transaction.atomic():
+            user = User.objects.create_user(username, email=email, password=password)
+            if user is None:
+                raise RuntimeError("Unable to create user for some reasons")
+            for group in self.default_groups:
+                user.groups.add(group)
+            user.save()
         return user
 
     def authenticate(self, username, password):
@@ -105,6 +110,6 @@ class Users(object):
         return user
 
 
-__default_groups = Group.objects.filter(name=settings.DEFAULT_GROUPS)
+__default_groups = Group.objects.filter(Q(name__in=settings.DEFAULT_GROUPS))
 
 users = Users(default_groups=__default_groups)

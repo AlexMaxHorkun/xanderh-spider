@@ -6,6 +6,7 @@ import base64
 
 from django import shortcuts
 from django import http
+from django.contrib.auth.decorators import permission_required
 
 from xanderhorkunspider.web.websites import models
 from xanderhorkunspider.web.websites import forms
@@ -23,6 +24,7 @@ def index_view(request):
     return shortcuts.render(request, 'websites/index.html', {'websites': websites})
 
 
+@permission_required('websitesmodel.edit_websites')
 def edit_website_view(request, wid=None):
     template = 'websites/add_website.html'
     websites = domain.websites_domain  # domain.Websites(dao.PageDao(), models.WebsitesDBDao(), dao.LoadingDao())
