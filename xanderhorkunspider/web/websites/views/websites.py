@@ -24,10 +24,10 @@ def index_view(request):
     return shortcuts.render(request, 'websites/index.html', {'websites': websites})
 
 
-@permission_required('websitesmodel.edit_websites')
+@permission_required('websites.edit_websites')
 def edit_website_view(request, wid=None):
     template = 'websites/add_website.html'
-    websites = domain.websites_domain  # domain.Websites(dao.PageDao(), models.WebsitesDBDao(), dao.LoadingDao())
+    websites = domain.websites_domain
     website = None
     if wid is not None:
         website = websites.find(wid)
@@ -53,6 +53,7 @@ def edit_website_view(request, wid=None):
     return shortcuts.render(request, template, {'form': form, 'website': website})
 
 
+@permission_required('websites.edit_websites')
 def delete_website_view(request, wid=None):
     template = 'websites/delete_website.html'
     websites = domain.websites_domain
@@ -66,6 +67,7 @@ def delete_website_view(request, wid=None):
         return shortcuts.render(request, template, {'website': website})
 
 
+@permission_required('websites.edit_websites')
 def edit_page_view(request, pid=None, wid=None):
     template = 'websites/edit_page.html'
     websites = domain.websites_domain
@@ -90,6 +92,7 @@ def edit_page_view(request, pid=None, wid=None):
     return shortcuts.render(request, template, {'page': page, 'form': form})
 
 
+@permission_required('websites.edit_websites')
 def delete_page_view(request, pid):
     websites = domain.websites_domain
     page = websites.find_page(pid)
@@ -102,6 +105,7 @@ def delete_page_view(request, pid):
         return shortcuts.render(request, 'websites/delete_page.html', {'page': page})
 
 
+@permission_required('websites.run_spider_sessions')
 def spider_session_view(request, wid):
     websites = domain.websites_domain
     website = websites.find(wid)
@@ -116,6 +120,7 @@ def spider_session_view(request, wid):
                              'default_max_process_count': domain.spider_factory.max_processes})
 
 
+@permission_required('websites.run_spider_sessions')
 def start_spider_session_view(request):
     wid = request.GET.get('website')
     sid = request.GET.get('spider_id')
@@ -144,6 +149,7 @@ def start_spider_session_view(request):
                             {'spider': spider, 'website': website, 'spider_id': id(spider)})
 
 
+@permission_required('websites.run_spider_sessions')
 def spider_status_view(request, sid):
     """
     Gets information about spider and it's processes. Returns json.

@@ -3,10 +3,10 @@ __email__ = 'mindkilleralexs@gmail.com'
 
 from django import shortcuts
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 
 from xanderhorkunspider.web.websites.domain import users
 from xanderhorkunspider.web.websites import forms
-
 
 
 
@@ -14,9 +14,7 @@ from xanderhorkunspider.web.websites import forms
 
 def signup_view(request):
     if request.user.is_authenticated():
-        user = request.user
-    else:
-        user = None
+        return shortcuts.redirect('index')
     if request.method == 'POST':
         form = forms.SignupForm(request.POST)
         if form.is_valid():
@@ -39,6 +37,7 @@ def signup_view(request):
     return shortcuts.render(request, "websites/auth/signup.html", {'form': form})
 
 
+@login_required()
 def logout_view(request):
     if request.user.is_authenticated:
         logout(request)
