@@ -105,7 +105,7 @@ class Users(object):
         :return: User instance.
         """
         user = django_auth(username=username, password=password)
-        if not user.is_active:
+        if user and not user.is_active:
             user = None
         return user
 
