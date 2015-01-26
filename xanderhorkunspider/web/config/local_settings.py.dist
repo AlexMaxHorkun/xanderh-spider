@@ -1,6 +1,8 @@
+import tempfile as __tempfile
 DB_ENGINE = 'django.db.backends.postgresql_psycopg2'
 DB_NAME = 'mydatabase'
 DB_USER = 'mydatabaseuser'
 PASSWORD = 'mypassword'
 DB_HOST = '127.0.0.1'
 DB_PORT = '5432'
+SESSION_FILEPATH = __tempfile.gettempdir()

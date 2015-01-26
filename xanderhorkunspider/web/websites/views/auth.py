@@ -10,6 +10,7 @@ from xanderhorkunspider.web.websites import forms
 
 
 
+
 # Auth related views
 
 def signup_view(request):
@@ -18,6 +19,7 @@ def signup_view(request):
     if request.method == 'POST':
         form = forms.SignupForm(request.POST)
         if form.is_valid():
+            user = None
             try:
                 user = users.create(form.cleaned_data['username'], email=form.cleaned_data['email'],
                                     password=form.cleaned_data['password'])
@@ -29,6 +31,8 @@ def signup_view(request):
                                           password=form.cleaned_data['password'])
                 if user:
                     login(request, user)
+                    if not form.cleaned_data['rememberme']:
+                        request.session.set_expiry(0)
                     return shortcuts.redirect('index')
                 else:
                     raise RuntimeError("Unable to create user or authenticate")
@@ -55,6 +59,8 @@ def login_view(request):
             user = users.authenticate(request.POST['username'], request.POST['password'])
             if user:
                 login(request, user)
+                if not request.POST.get('rememberme', None):
+                    request.session.set_expiry(0)
                 return shortcuts.redirect('index')
             else:
                 bad_credentials_error = True

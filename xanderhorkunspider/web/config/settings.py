@@ -106,3 +106,7 @@ STATICFILES_DIRS = (
 DEFAULT_GROUPS = ("user",)
 
 DEFAULT_PERMISSIONS = {'user': ['edit_websites', "run_spider_sessions"]}
+
+# Session
+SESSION_ENGINE = "django.contrib.sessions.backends.file"
+SESSION_FILE_PATH = local_settings.SESSION_FILEPATH
