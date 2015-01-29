@@ -1,28 +1,40 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <div id="create-new-button"><a href="{% url 'add_website' %}">Create new website</a> <a href="{% url 'add_page' %}">Create
-        a page</a></div>
-    <div id="websites-list">
-        <h2>Websites list:</h2>
-        <ul>
-            {% for w in websites %}
+<div id="create-new-button"><a href="{% url 'add_website' %}">Create new website</a> <a href="{% url 'add_page' %}">Create
+    a page</a></div>
+<div id="websites-list">
+    <h2>Websites list:</h2>
+    <ul>
+        {% for w in websites %}
+        <li>
+            "{{ w.name }}", host - {{ w.host }}
+            <a href="{% url 'spider_session' wid=w.id %}">Spider session</a>
+            <a href="{% url 'edit_website' wid=w.id %}">Edit</a>
+            <a href="{% url 'delete_website' wid=w.id %}">Delete</a>
+            <ul>
+                <li><a href="{% url 'add_page_to_website' wid=w.id %}">Add a page</a></li>
+                {% for p in w.pages|slice:":10" %}
                 <li>
-                    "{{ w.name }}", host - {{ w.host }}
-                    <a href="{% url 'spider_session' wid=w.id %}">Spider session</a>
-                    <a href="{% url 'edit_website' wid=w.id %}">Edit</a>
-                    <a href="{% url 'delete_website' wid=w.id %}">Delete</a>
-                    <ul>
-                        <li><a href="{% url 'add_page_to_website' wid=w.id %}">Add a page</a></li>
-                        {% for p in w.pages %}
-                            <li>
-                                {{ p.url }}
-                                <a href="{% url 'edit_page' pid=p.id %}">Edit page</a>
-                                <a href="{% url 'delete_page' p.id %}">Delete page</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    {{ p.url|slice:":35" }}{% if p.url|length > 35 %}...{% endif %}
+                    <a href="{% url 'edit_page' pid=p.id %}">Edit page</a>
+                    <a href="{% url 'delete_page' p.id %}">Delete page</a>
                 </li>
-            {% endfor %}
-        </ul>
-    </div>
+                {% endfor %}
+            </ul>
+            {% if w.pages|length > 10 %}
+            ... and more
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div style="float: right; vertical-align: top">
+    <h4>Most recent loadings</h4>
+    {% if last_loadings %}
+    {% for l in last_loadings %}
+    <div>{{ l.page.url|slice:":35" }}{% if l.page.url|length > 35 %}...{% endif %}, loaded at {{ l.time }}</div>
+    {% endfor %}
+    {% endif %}
+</div>
 {% endblock content %}

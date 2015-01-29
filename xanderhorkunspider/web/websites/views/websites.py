@@ -21,7 +21,8 @@ def index_view(request):
     """
     websites_domain = domain.websites_domain
     websites = websites_domain.find_websites()
-    return shortcuts.render(request, 'websites/index.html', {'websites': websites})
+    last_loadings = domain.websites_domain.find_last_loadings()
+    return shortcuts.render(request, 'websites/index.html', {'websites': websites, 'last_loadings': last_loadings})
 
 
 @permission_required('websites.edit_websites')

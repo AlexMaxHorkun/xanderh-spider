@@ -207,8 +207,20 @@ class LoadingDBDao(LoadingDao):
         else:
             raise ValueError()
 
-    def find_all(self, limit=0, offset=0):
+    def find_all(self, limit=0, offset=0, order_by='time', order_asc=False):
+        """
+        Gets list of Loadings from storage.
+        :param limit: Max amount of entities to return.
+        :param offset: Start index.
+        :param order_by: Order loadings by property, time or id.
+        :param order_asc: True for ascending, false for descending ordering.
+        :return: List of Loadings.
+        """
         query = LoadingModel.objects.all()
+        if order_by in ('time', 'id'):
+            if not order_asc:
+                order_by = '-' + order_by
+            query = query.order_by(order_by)
         if limit > 0:
             query = query[:limit]
         if offset > 0:

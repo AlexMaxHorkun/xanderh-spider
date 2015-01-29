@@ -5,6 +5,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate as django_auth
 from django.db import transaction
 from django.db.models import Q
+from django.core.cache import cache
 
 from xanderhorkunspider import domain
 from xanderhorkunspider.web.websites import models
@@ -15,7 +16,25 @@ from xanderhorkunspider import spider
 __websites_dao = models.WebsitesDBDao()
 __pages_dao = models.PagesDBDao()
 __loading_dao = models.LoadingDBDao()
-websites_domain = domain.Websites(__pages_dao, __websites_dao, __loading_dao)
+
+
+class Websites(domain.Websites):
+    def find_last_loadings(self, limit=10):
+        """
+        Gets a list of most recently created loadings.
+
+        :param limit: Max amount of items to return.
+        :return: List of Loading models.
+        """
+        cache_key = 'last_loadings_' + str(10)
+        if cache_key in cache:
+            return cache.get(cache_key)
+        loadings = self._loading_dao.find_all(limit=limit, order_by='time', order_asc=False)
+        cache.set(cache_key, loadings, 600)
+        return loadings
+
+
+websites_domain = Websites(__pages_dao, __websites_dao, __loading_dao)
 
 
 class SpiderFactory(object):

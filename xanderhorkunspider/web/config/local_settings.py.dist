@@ -6,3 +6,12 @@ PASSWORD = 'mypassword'
 DB_HOST = '127.0.0.1'
 DB_PORT = '5432'
 SESSION_FILEPATH = __tempfile.gettempdir()
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+        'OPTIONS': {
+            'KEY_PREFIX': 'xanderhspider_',
+        }
+    }
+}
