@@ -2,7 +2,7 @@
 {% block content %}
 <div id="create-new-button"><a href="{% url 'add_website' %}">Create new website</a> <a href="{% url 'add_page' %}">Create
     a page</a></div>
-<div id="websites-list">
+<div id="websites-list" style="display: table-cell">
     <h2>Websites list:</h2>
     <ul>
         {% for w in websites %}
@@ -29,7 +29,7 @@
     </ul>
 </div>
 
-<div style="float: right; vertical-align: top">
+<div style="display:table-cell">
     <h4>Most recent loadings</h4>
     {% if last_loadings %}
     {% for l in last_loadings %}

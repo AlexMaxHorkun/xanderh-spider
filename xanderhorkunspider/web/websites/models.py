@@ -225,4 +225,4 @@ class LoadingDBDao(LoadingDao):
             query = query[:limit]
         if offset > 0:
             query = query[offset:]
-        return query
+        return list(query)
