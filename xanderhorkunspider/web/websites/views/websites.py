@@ -16,8 +16,10 @@ from xanderhorkunspider.web.websites import domain
 def index_view(request):
     """
     Home page of "websites" module.
-    :param request: http.HttpRequest.
-    :return: http.HttpResponse.
+    Shows list of websites and some of their pages along with most recent loadings.
+
+    :type request: django.http.HttpRequest
+    :rtype: django.http.HttpResponse
     """
     websites_domain = domain.websites_domain
     websites = websites_domain.find_websites()
@@ -27,6 +29,13 @@ def index_view(request):
 
 @permission_required('websites.edit_websites')
 def edit_website_view(request, wid=None):
+    """
+    Page allows to create/edit a website entity.
+
+    :type request: django.http.HttpRequest
+    :param wid: Website's ID, it's an edit form when given, create form otherwise.
+    :rtype: django.http.HttpResponse
+    """
     template = 'websites/add_website.html'
     websites = domain.websites_domain
     website = None
@@ -55,7 +64,14 @@ def edit_website_view(request, wid=None):
 
 
 @permission_required('websites.edit_websites')
-def delete_website_view(request, wid=None):
+def delete_website_view(request, wid):
+    """
+    User can delete a website here.
+
+    :param wid: Website's ID.
+    :type request: django.http.HttpRequest
+    :rtype: django.http.HttpResponse
+    """
     template = 'websites/delete_website.html'
     websites = domain.websites_domain
     website = websites.find(wid)
@@ -70,6 +86,14 @@ def delete_website_view(request, wid=None):
 
 @permission_required('websites.edit_websites')
 def edit_page_view(request, pid=None, wid=None):
+    """
+    Page allows to create/edit a website's page entity.
+
+    :type request: django.http.HttpRequest
+    :param wid: Website's ID, when given the would be able to be assigned only to this website.
+    :param pid: Page's ID, if given it's an edit form, create form otherwise.
+    :rtype: django.http.HttpResponse
+    """
     template = 'websites/edit_page.html'
     websites = domain.websites_domain
     if pid:
@@ -95,6 +119,13 @@ def edit_page_view(request, pid=None, wid=None):
 
 @permission_required('websites.edit_websites')
 def delete_page_view(request, pid):
+    """
+    User can delete a website's page here.
+
+    :param pid: Page's ID.
+    :type request: django.http.HttpRequest
+    :rtype: django.http.HttpResponse
+    """
     websites = domain.websites_domain
     page = websites.find_page(pid)
     if not page:
@@ -108,6 +139,14 @@ def delete_page_view(request, pid):
 
 @permission_required('websites.run_spider_sessions')
 def spider_session_view(request, wid):
+    """
+    User can start and/or monitor a spider session here.
+    Spider loads a website's pages' contents, saves it and finds links to new pages in it.
+
+    :param wid: Website's ID.
+    :type request: django.http.HttpRequest
+    :rtype: django.http.HttpResponse
+    """
     websites = domain.websites_domain
     website = websites.find(wid)
     if not website:
@@ -123,6 +162,12 @@ def spider_session_view(request, wid):
 
 @permission_required('websites.run_spider_sessions')
 def start_spider_session_view(request):
+    """
+    This is a block at "spider session" page. It shows current processes and stuff.
+
+    :type request: django.http.HttpRequest
+    :rtype: django.http.HttpResponse
+    """
     wid = request.GET.get('website')
     sid = request.GET.get('spider_id')
     if request.GET.get('max_processes'):
@@ -154,6 +199,9 @@ def start_spider_session_view(request):
 def spider_status_view(request, sid):
     """
     Gets information about spider and it's processes. Returns json.
+
+    :type request: django.http.HttpRequest
+    :rtype: django.http.HttpResponse
     """
     spider_manager = domain.spider_factory.find_spider_by_id(sid)
     if not spider_manager:

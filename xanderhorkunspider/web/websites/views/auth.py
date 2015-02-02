@@ -9,11 +9,16 @@ from xanderhorkunspider.web.websites.domain import users
 from xanderhorkunspider.web.websites import forms
 
 
-
-
 # Auth related views
 
 def signup_view(request):
+    """
+    This page allows user to register, contains sign up form.
+    :param request: HTTP request.
+    :type request: django.http.HttpRequest
+    :return: HTTP response.
+    :rtype: django.http.HttpResponse
+    """
     if request.user.is_authenticated():
         return shortcuts.redirect('index')
     if request.method == 'POST':
@@ -43,12 +48,26 @@ def signup_view(request):
 
 @login_required()
 def logout_view(request):
+    """
+    This page allows user to logout, does not contain any HTML output.
+    :param request: HTTP request.
+    :type request: django.http.HttpRequest
+    :return: HTTP response.
+    :rtype: django.http.HttpResponse
+    """
     if request.user.is_authenticated:
         logout(request)
     return shortcuts.redirect('index')
 
 
 def login_view(request):
+    """
+    This page allows user to login, contains login form.
+    :param request: HTTP request.
+    :type request: django.http.HttpRequest
+    :return: HTTP response.
+    :rtype: django.http.HttpResponse
+    """
     if request.user.is_authenticated():
         return shortcuts.redirect('index')
     bad_credentials_error = False
