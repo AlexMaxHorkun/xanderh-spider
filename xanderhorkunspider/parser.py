@@ -1,4 +1,4 @@
-__author__ = 'Alexander Horkun'
+__author__ = 'Alexander Gorkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
 import urllib.parse
