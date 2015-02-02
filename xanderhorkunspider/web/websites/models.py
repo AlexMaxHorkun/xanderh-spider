@@ -216,7 +216,7 @@ class LoadingDBDao(LoadingDao):
         :param order_asc: True for ascending, false for descending ordering.
         :return: List of Loadings.
         """
-        query = LoadingModel.objects.all()
+        query = LoadingModel.objects.select_related('page').all()
         if order_by in ('time', 'id'):
             if not order_asc:
                 order_by = '-' + order_by

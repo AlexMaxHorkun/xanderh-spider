@@ -26,9 +26,9 @@ SECRET_KEY = 'q1gy4n0v@!nl-a=--r5wkph$#nhum#kx(25z10+1s-ph6cf0j+'
 LOGIN_URL = 'login'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = local_settings.DEBUG
 
-TEMPLATE_DEBUG = True
+TEMPLATE_DEBUG = local_settings.TEMPLATE_DEBUG
 
 TEMPLATE_DIRS = (BASE_DIR + '/templates',)
 
@@ -49,7 +49,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'xanderhorkunspider.web.websites',
-)
+)+local_settings.INSTALLED_APPS
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',

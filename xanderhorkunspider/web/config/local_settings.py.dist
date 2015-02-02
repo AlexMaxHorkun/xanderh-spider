@@ -15,3 +15,6 @@ CACHES = {
         }
     }
 }
+DEBUG = True
+TEMPLATE_DEBUG = True
+INSTALLED_APPS = ('django_toolbar',)
