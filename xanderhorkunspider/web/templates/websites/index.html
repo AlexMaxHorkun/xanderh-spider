@@ -2,9 +2,10 @@
 {% block content %}
 <div id="create-new-button"><a href="{% url 'add_website' %}">Create new website</a> <a href="{% url 'add_page' %}">Create
     a page</a></div>
-<div id="websites-list" style="display: table-cell">
+<div id="websites-list" style="display: table-cell;padding-right:10px">
     <h2>Websites list:</h2>
     <ul>
+        {% if websites %}
         {% for w in websites %}
         <li>
             "{{ w.name }}", host - {{ w.host }}
@@ -26,6 +27,9 @@
             {% endif %}
         </li>
         {% endfor %}
+        {% else %}
+        <li>List is empty</li>
+        {% endif %}
     </ul>
 </div>
 
@@ -35,6 +39,8 @@
     {% for l in last_loadings %}
     <div>{{ l.page.url|slice:":35" }}{% if l.page.url|length > 35 %}...{% endif %}, loaded at {{ l.time }}</div>
     {% endfor %}
+    {% else %}
+        <i>None found</i>
     {% endif %}
 </div>
 {% endblock content %}

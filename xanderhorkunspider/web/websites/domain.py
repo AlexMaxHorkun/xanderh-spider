@@ -113,7 +113,6 @@ class Users(object):
                 raise RuntimeError("Unable to create user for some reasons")
             for group in self.default_groups:
                 user.groups.add(group)
-            user.save()
         return user
 
     def authenticate(self, username, password):

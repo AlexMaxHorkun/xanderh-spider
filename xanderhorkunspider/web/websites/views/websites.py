@@ -7,6 +7,7 @@ import base64
 from django import shortcuts
 from django import http
 from django.contrib.auth.decorators import permission_required
+from django.http import HttpResponse
 
 from xanderhorkunspider.web.websites import models
 from xanderhorkunspider.web.websites import forms
