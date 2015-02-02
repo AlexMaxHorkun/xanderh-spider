@@ -9,6 +9,16 @@
 </head>
 <body>
 <div id="header">
+    {% block header_title %}
+    <div id="header-title">
+        <h2>"Spider" by Alexander Gorkun <a href="https://github.com/AlexMaxHorkun/xanderh-spider">GitHub</a></h2>
+        <h3>Application allows to load web pages, save it's content and find links to other pages in it.</h3>
+        <h3>
+            Start with adding a website entity, specify host (example.com), create at least one page (http://example.com)
+            and start a "Spider session"
+        </h3>
+    </div>
+    {% endblock header_title %}
     {% block header %}Welcome
         {% if user.is_authenticated %}, {{ user.get_username }} <a href="{% url 'logout' %}">Logout</a>{% else %}
             guest
