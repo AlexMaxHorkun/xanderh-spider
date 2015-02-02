@@ -34,7 +34,7 @@ SpiderStatus.prototype.update = function () {
     if (this.spiderId) {
         data.spider_id = this.spiderId;
     }
-    else if (this.websiteId) {
+    if (this.websiteId) {
         data.website_id = this.websiteId;
     }
     $.get(this.receiveStatusUrl, data, function (data) {
@@ -92,6 +92,7 @@ SpiderStatusRenderer.prototype.render = function (loadings, isAlive, pagesCount)
         $("#spider-status #spider-stance #running").hide();
         $("#spider-status #spider-stance #stopped").show();
     }
+    console.log("pages count = "+pagesCount);
     if (pagesCount) {
         $("#spider-session #website-pages-count").text(pagesCount);
     }
