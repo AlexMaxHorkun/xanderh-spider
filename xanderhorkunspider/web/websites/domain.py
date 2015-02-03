@@ -19,6 +19,10 @@ __loading_dao = models.LoadingDBDao()
 
 
 class Websites(domain.Websites):
+    """
+    Class contains business logic related to websites, pages and loadings.
+    """
+
     def find_last_loadings(self, limit=10):
         """
         Gets a list of most recently created loadings.
@@ -38,13 +42,18 @@ websites_domain = Websites(__pages_dao, __websites_dao, __loading_dao)
 
 
 class SpiderFactory(object):
+    """
+    Creates and stores spiders.
+    """
+
     spiders = []
     websites = None
     max_processes = None
 
     def __init__(self, def_websites, def_max_p=10):
         """
-        Creates and stores SpiderManager instances.
+        Setting default parameters for future spiders.
+
         :param def_websites: Default Websites domain object to create spiders.
         :param def_max_p: Default max processes amount for spiders.
         """
@@ -86,6 +95,10 @@ spider_factory = SpiderFactory(websites_domain)
 
 
 class Users(object):
+    """
+    Contains business logic to work with users.
+    """
+
     default_groups = set()
 
     def __init__(self, default_groups=None):

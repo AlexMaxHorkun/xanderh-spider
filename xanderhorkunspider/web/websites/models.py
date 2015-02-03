@@ -14,6 +14,10 @@ from xanderhorkunspider.dao import LoadingDao
 
 
 class WebsitesModel(models.Model, Website):
+    """
+    Represents websites, a list of pages (urls) with a host to determine if a page belongs to it and a name for UI.
+    """
+
     id = models.AutoField(primary_key=True)
     host = models.CharField(max_length=128)
     name = models.CharField(max_length=255)
@@ -37,6 +41,10 @@ class WebsitesModel(models.Model, Website):
 
 
 class WebsitesDBDao(WebsiteDao):
+    """
+    Implementation of DAO interface for website entities for spider to use.
+    """
+
     def find_all(self, offset=0, limit=0):
         query = WebsitesModel.objects.all()
         if limit > 0:
@@ -88,6 +96,10 @@ class WebsitesDBDao(WebsiteDao):
 
 
 class PageModel(models.Model, Page):
+    """
+    Represents pages (urls) of a website.
+    """
+
     id = models.AutoField(primary_key=True)
     url = models.CharField(max_length=255, unique=True)
     website = models.ForeignKey(WebsitesModel, related_name='pages_set', on_delete=models.CASCADE)
@@ -100,6 +112,10 @@ class PageModel(models.Model, Page):
 
 
 class PagesDBDao(PageDao):
+    """
+    Implementation of DAO interface for page entities for spider to use.
+    """
+
     def find(self, pid):
         return PageModel.objects.get(pk=pid)
 
@@ -148,6 +164,10 @@ class PagesDBDao(PageDao):
 
 
 class LoadingModel(models.Model, Loading):
+    """
+    Represents loading result of a page.
+    """
+
     id = models.AutoField(primary_key=True)
     page = models.ForeignKey(PageModel, related_name='loadings_set', on_delete=models.CASCADE)
     success = models.BooleanField(default=False)
@@ -165,6 +185,10 @@ class LoadingModel(models.Model, Loading):
 
 
 class LoadingDBDao(LoadingDao):
+    """
+    Implementation of DAO interface for loading entity for spider to use.
+    """
+
     @classmethod
     def _entity_to_model(cls, entity, model):
         """

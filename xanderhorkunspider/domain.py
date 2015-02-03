@@ -5,6 +5,10 @@ from xanderhorkunspider import models
 
 
 class Websites(object):
+    """
+    Contains methods for spider to use to work with websites, pages and loadings.
+    """
+
     _page_dao = None
     _website_dao = None
     _loading_dao = None

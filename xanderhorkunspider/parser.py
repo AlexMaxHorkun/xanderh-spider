@@ -7,7 +7,7 @@ import re
 
 class LinksParser(object):
     """
-    Gets links out of html.
+    Gets links out of html. Checks if they belong to the website the loaded page does.
     """
 
     def _validateurl(self, loading, url):

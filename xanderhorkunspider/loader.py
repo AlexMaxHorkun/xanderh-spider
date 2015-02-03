@@ -5,6 +5,10 @@ import requests
 
 
 class LoadResult(object):
+    """
+    Simply stores results of loading a page.
+    """
+
     url = ""
     headers = {}
     body = ""
@@ -23,6 +27,10 @@ class LoadResult(object):
 
 
 class Loader(object):
+    """
+    Used to get a web page's content.
+    """
+
     timeout = 5
 
     def __init__(self, timeout=0):
