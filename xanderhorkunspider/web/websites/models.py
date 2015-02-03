@@ -173,7 +173,7 @@ class LoadingModel(models.Model, Loading):
     success = models.BooleanField(default=False)
     headers = {}
     headers_serialized = models.CharField(max_length=4096)
-    content = models.CharField(max_length=1024000)
+    content = models.TextField()
     time = models.DateTimeField(auto_now=True)
     loading_time = models.PositiveIntegerField()
 
