@@ -174,7 +174,7 @@ class LoadingModel(models.Model, Loading):
     headers = {}
     headers_serialized = models.CharField(max_length=4096)
     content = models.TextField()
-    time = models.DateTimeField(auto_now=True)
+    time = models.DateTimeField(auto_now_add=True)
     loading_time = models.PositiveIntegerField()
 
     def __str__(self):

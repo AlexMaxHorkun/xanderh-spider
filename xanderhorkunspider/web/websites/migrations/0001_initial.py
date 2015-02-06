@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 ('success', models.BooleanField(default=False)),
                 ('headers_serialized', models.CharField(max_length=4096)),
                 ('content', models.CharField(max_length=1024000)),
-                ('time', models.DateTimeField(auto_now=True)),
+                ('time', models.DateTimeField(auto_now_add=True)),
                 ('loading_time', models.PositiveIntegerField()),
             ],
             options={
