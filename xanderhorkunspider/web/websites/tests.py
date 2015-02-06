@@ -1,7 +1,6 @@
 __author__ = 'Alexander Gorkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
-import logging
 
 from django.test import TestCase
 
@@ -34,7 +33,6 @@ class WebsitesDomainTestCase(TestCase):
             content="test2",
             loading_time=6
         )
-        logging.info("couple days age is %s" % couple_days_ago)
         test_loading3 = models.LoadingModel.objects.create(
             page=test_page,
             success=True,
