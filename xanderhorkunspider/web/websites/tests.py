@@ -1,7 +1,7 @@
 __author__ = 'Alexander Gorkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
-from datetime import datetime, timedelta
+import logging
 
 from django.test import TestCase
 
@@ -22,32 +22,29 @@ class WebsitesDomainTestCase(TestCase):
         test_website.name = "Example"
         test_website.save()
         test_page = models.PageModel.objects.create(url="http://www.example.com", website=test_website)
-        now = datetime.now()
         test_loading1 = models.LoadingModel.objects.create(
             page=test_page,
             success=True,
             content="test1",
-            loading_time=5,
-            time=now
+            loading_time=5
         )
         test_loading2 = models.LoadingModel.objects.create(
             page=test_page,
             success=True,
             content="test2",
-            loading_time=6,
-            time=now
+            loading_time=6
         )
-        self.__most_recent_loadings.add(test_loading1)
-        self.__most_recent_loadings.add(test_loading2)
-        couple_days_ago = now - timedelta(days=3)
+        logging.info("couple days age is %s" % couple_days_ago)
         test_loading3 = models.LoadingModel.objects.create(
             page=test_page,
             success=True,
             content="test3",
-            loading_time=6,
-            time=couple_days_ago
+            loading_time=6
         )
+        self.__most_recent_loadings.add(test_loading2)
+        self.__most_recent_loadings.add(test_loading3)
 
     def test_find_last_loadings(self):
+        """Testing method which finds the most recent loadings"""
         last_loadings = domain.websites_domain.find_last_loadings(len(self.__most_recent_loadings))
-        self.assertEqual(self.__most_recent_loadings, last_loadings)
+        self.assertEqual(set(last_loadings), self.__most_recent_loadings)
