@@ -11,7 +11,7 @@ class InMemoryPageDao(dao.PageDao):
     __pages = {}
 
     def find_by_url(self, url):
-        for p in self.__pages:
+        for pid, p in self.__pages.items():
             if p.url == url:
                 return p
         return None
@@ -38,7 +38,7 @@ class InMemoryLoadingDao(dao.LoadingDao):
 
     def find_all(self, limit=0, offset=0):
         loadings = []
-        for lid, l in self.__loadings:
+        for lid, l in self.__loadings.items():
             loadings.append(l)
         if offset > 0:
             loadings = loadings[offset:]
