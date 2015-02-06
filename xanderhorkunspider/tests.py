@@ -2,6 +2,7 @@ __author__ = 'Alexander Gorkun'
 __email__ = 'mindkilleralexs@gmail.com'
 
 import unittest
+import time
 
 import httpretty
 
@@ -46,7 +47,9 @@ class TestLinksParser(unittest.TestCase):
     mock_url = "/someshit"
 
     def test_parse(self):
-        website = models.Website("Some site", self.mock_host)
+        website = models.Website()
+        website.name = "Some site"
+        website.host = self.mock_host
         page = models.Page()
         page.website = website
         page.url = self.mock_page_url + self.mock_url
@@ -59,8 +62,6 @@ class TestLinksParser(unittest.TestCase):
         testlinks = {self.mock_page_url + '/relative-link/23', 'http://ohersubdomain.example.com/someshit',
                      "http://" + self.mock_host + '/gofuckyourself',
                      self.mock_page_url + self.mock_url + '/gofurther'}
-        print(links)
-        print(testlinks)
         self.assertTrue(links == testlinks)
 
 
@@ -116,10 +117,14 @@ class TestSpiderManager(unittest.TestCase):
         spider_manager = spider.SpiderManager(websites, spdr)
         spider_manager.crawl(page1)
         spider_manager.crawl(page2)
+        spider_manager.start()
+        """Giving 5 sec for spider to run"""
+        time.sleep(5)
         spider_manager.stop_when_done = True
         spider_manager.join()
         received_links = set()
         for l in websites.find_loadings():
             received_links.add(l.page.url)
+
         self.assertTrue(received_links == {self.mock_base_url,
                                            self.mock_base_url + '/page2', page2.url + "/page3"})
