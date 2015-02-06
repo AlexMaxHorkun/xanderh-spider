@@ -38,6 +38,7 @@ def create_groups_and_permissions(app, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
+        ("websites", "0001_initial")
     ]
 
     operations = [
