@@ -17,4 +17,4 @@ CACHES = {
 }
 DEBUG = True
 TEMPLATE_DEBUG = True
-INSTALLED_APPS = ('django_toolbar',)
+INSTALLED_APPS = ('debug_toolbar',)
