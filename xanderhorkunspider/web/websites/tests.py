@@ -3,9 +3,10 @@ __email__ = 'mindkilleralexs@gmail.com'
 
 
 from django.test import TestCase
-
+from django.contrib.auth.models import User, Group
 from xanderhorkunspider.web.websites import domain
 from xanderhorkunspider.web.websites import models
+from xanderhorkunspider.web import config
 
 
 class WebsitesDomainTestCase(TestCase):
@@ -46,3 +47,28 @@ class WebsitesDomainTestCase(TestCase):
         """Testing method which finds the most recent loadings"""
         last_loadings = domain.websites_domain.find_last_loadings(len(self.__most_recent_loadings))
         self.assertEqual(set(last_loadings), self.__most_recent_loadings)
+
+
+class UsersDomainTestCase(TestCase):
+    """
+    Testing domain class responsible of managing users.
+    """
+
+    def test_create(self):
+        """
+        Testing creating new user.
+        """
+        test_email = 'test@test1.com'
+        test_username = 'test'
+        test_pass = 'testpass'
+
+        """Creating a valid user"""
+        user = domain.users.create(test_username, test_email, test_pass)
+        self.assertTrue(user.id > 0, "User's ID is not greater then zero")
+        self.assertIsNotNone(user, "Returned None instead of a user")
+        self.assertEqual(user.email, test_email, "Emails are not equal")
+        self.assertEqual(user.username, test_username, "Usernames are not equal")
+        self.assertCountEqual(user.user_permissions.all(), config.settings.DEFAULT_GROUPS,
+                              "Standard groups were not assigned to user")
+        for group in user.groups.all():
+            self.assertIn(group.name, config.settings.DEFAULT_GROUPS, "Some unknown group was assigned to user")
