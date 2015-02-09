@@ -53,6 +53,17 @@ class UsersDomainTestCase(TestCase):
     """
     Testing domain class responsible of managing users.
     """
+    __user_active_username = "setupuser"
+    __user_active_password = "12345"
+    __user_inactive_username = "setupuser1"
+    __user_inactive_password = "12345"
+
+    def setUp(self):
+        """Creating users"""
+        User.objects.create_user(self.__user_active_username, "setupuser@email.com", self.__user_active_password)
+        user = User.objects.create_user(self.__user_inactive_username, "setupuser1@email.com", self.__user_inactive_password)
+        user.is_active = False
+        user.save()
 
     def test_create(self):
         """
@@ -79,3 +90,12 @@ class UsersDomainTestCase(TestCase):
         "Creating invalid users with blank username and non-unique email"
         self.assertRaises(Exception, domain.users.create, None, test_email+"1", test_pass)
         self.assertRaises(Exception, domain.users.create, test_username+"1", test_email, test_pass)
+
+    def test_authenticate(self):
+        """
+        Testing "authenticate" method.
+        """
+        self.assertIsInstance(domain.users.authenticate(self.__user_active_username, self.__user_active_password),
+                              User, "valid user not authenticated")
+        self.assertIsNone(domain.users.authenticate(self.__user_inactive_username, self.__user_inactive_password),
+                          "invalid user authenticated")
