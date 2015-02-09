@@ -98,16 +98,17 @@ class Users(object):
     """
     Contains business logic to work with users.
     """
+    __default_groups = None
 
-    default_groups = set()
-
-    def __init__(self, default_groups=None):
+    def __init__(self):
         """
         Class is responsible for maintaining users (creation, authorization etc.)
-        :param default_groups: Default groups for all new-created users, set of Group entities.
         """
-        if default_groups:
-            self.default_groups = set(default_groups)
+
+    def fetch_default_groups(self):
+        if self.__default_groups is None:
+            self.__default_groups = set(Group.objects.filter(Q(name__in=settings.DEFAULT_GROUPS)))
+        return self.__default_groups
 
     def create(self, username, email, password):
         """
@@ -118,13 +119,13 @@ class Users(object):
         :raises ValueError: If user with such credentials already exists.
         :return: User instance.
         """
-        if (User.objects.filter(username=username) | User.objects.filter(email=username)).exists():
+        if User.objects.filter(email=email).exists() or User.objects.filter(username=username).exists():
             raise ValueError("Such user already exists")
         with transaction.atomic():
             user = User.objects.create_user(username, email=email, password=password)
             if user is None:
                 raise RuntimeError("Unable to create user for some reasons")
-            for group in self.default_groups:
+            for group in self.fetch_default_groups():
                 user.groups.add(group)
         return user
 
@@ -141,6 +142,4 @@ class Users(object):
         return user
 
 
-__default_groups = Group.objects.filter(Q(name__in=settings.DEFAULT_GROUPS))
-
-users = Users(default_groups=__default_groups)
+users = Users()
