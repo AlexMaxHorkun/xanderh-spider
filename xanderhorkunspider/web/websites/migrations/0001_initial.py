@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('success', models.BooleanField(default=False)),
                 ('headers_serialized', models.CharField(max_length=4096)),
-                ('content', models.CharField(max_length=1024000)),
+                ('content', models.TextField()),
                 ('time', models.DateTimeField(auto_now_add=True)),
                 ('loading_time', models.PositiveIntegerField()),
             ],
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
             name='PageModel',
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
-                ('url', models.CharField(unique=True, max_length=255)),
+                ('url', models.CharField(max_length=255, unique=True)),
             ],
             options={
                 'db_table': 'pages',
