@@ -105,7 +105,7 @@ class Users(object):
         Class is responsible for maintaining users (creation, authorization etc.)
         """
 
-    def fetch_default_groups(self):
+    def _fetch_default_groups(self):
         if self.__default_groups is None:
             self.__default_groups = set(Group.objects.filter(Q(name__in=settings.DEFAULT_GROUPS)))
         return self.__default_groups
@@ -125,7 +125,7 @@ class Users(object):
             user = User.objects.create_user(username, email=email, password=password)
             if user is None:
                 raise RuntimeError("Unable to create user for some reasons")
-            for group in self.fetch_default_groups():
+            for group in self._fetch_default_groups():
                 user.groups.add(group)
         return user
 
