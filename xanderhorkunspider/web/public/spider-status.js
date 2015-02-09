@@ -92,7 +92,6 @@ SpiderStatusRenderer.prototype.render = function (loadings, isAlive, pagesCount)
         $("#spider-status #spider-stance #running").hide();
         $("#spider-status #spider-stance #stopped").show();
     }
-    console.log("pages count = "+pagesCount);
     if (pagesCount) {
         $("#spider-session #website-pages-count").text(pagesCount);
     }
